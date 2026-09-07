@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import CitizenIntakeForm from '../components/CitizenIntakeForm';
 
 /* ============================================================================
  * Jhar Samadhan — module hub (/) for the SIH 26043 ecosystem.
@@ -8,6 +7,14 @@ import CitizenIntakeForm from '../components/CitizenIntakeForm';
  * ==========================================================================*/
 
 const MODULES = [
+  {
+    href: '/intake',
+    icon: '📝',
+    title: 'Citizen — Lodge a Complaint',
+    desc: 'Submit a civic issue with details, location, evidence and privacy preferences (Module 1).',
+    hint: 'no account required for prototype',
+    tone: 'border-blue-200 bg-blue-50/60',
+  },
   {
     href: '/admin/complaints?admin=1',
     icon: '🗂️',
@@ -86,24 +93,6 @@ export default function HubPage() {
           used until real session auth lands.
         </p>
       </header>
-
-      <section className="mt-8 rounded-2xl border border-indigo-200 bg-white p-5 shadow-sm sm:p-8">
-        <div className="mx-auto max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-700">
-            Citizen intake
-          </p>
-          <h2 className="mt-1 text-xl font-bold text-slate-900">
-            Report a civic issue
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Share what happened and where. You can add evidence and choose whether
-            your name is shown publicly.
-          </p>
-          <div className="mt-6">
-            <CitizenIntakeForm userId={17} />
-          </div>
-        </div>
-      </section>
 
       <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {MODULES.map((module) => (
