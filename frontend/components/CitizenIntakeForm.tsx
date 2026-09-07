@@ -144,7 +144,7 @@ const STEP_META: Record<
   },
   photos: {
     question: 'Add a photo as evidence?',
-    hint: 'Up to 4 photos, compressed to WebP under 500 KB right in your browser.',
+    hint: 'Up to 4 photos, compressed to WebP under 500 KB right in your browser. Photo storage must be configured by the deployment owner.',
   },
   privacy: {
     question: 'Should this report show your name publicly?',
