@@ -304,8 +304,16 @@ type GeoState =
   | { status: 'denied' }
   | { status: 'unavailable'; error: string };
 
+interface ReverseGeocodeResponse {
+  city?: string;
+  locality?: string;
+  principalSubdivision?: string;
+}
+
 function useGeolocation() {
   const [geo, setGeo] = useState<GeoState>({ status: 'idle' });
+  const [place, setPlace] = useState<string | null>(null);
+  const [placeError, setPlaceError] = useState<string | null>(null);
 
   const locate = useCallback(() => {
     if (typeof navigator === 'undefined' || !('geolocation' in navigator)) {
@@ -341,7 +349,38 @@ function useGeolocation() {
     locate();
   }, [locate]);
 
-  return { geo, retry: locate };
+  useEffect(() => {
+    if (geo.status !== 'ready') {
+      setPlace(null);
+      setPlaceError(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    const lookup = async () => {
+      try {
+        setPlaceError(null);
+        const response = await fetch(
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${geo.latitude}&longitude=${geo.longitude}&localityLanguage=en`,
+          { signal: controller.signal }
+        );
+        if (!response.ok) throw new Error(`Reverse geocoding returned ${response.status}.`);
+        const data = (await response.json()) as ReverseGeocodeResponse;
+        const city = data.city ?? data.locality;
+        const state = data.principalSubdivision;
+        setPlace(city && state ? `${city}, ${state}` : city ?? state ?? null);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        setPlace(null);
+        setPlaceError('City and state could not be determined.');
+      }
+    };
+
+    void lookup();
+    return () => controller.abort();
+  }, [geo]);
+
+  return { geo, place, placeError, retry: locate };
 }
 
 /* ----------------------------------------------------------------------------
@@ -387,7 +426,7 @@ export default function CitizenIntakeForm({
   maxPhotos = MAX_PHOTOS_DEFAULT,
 }: CitizenIntakeFormProps) {
   /* ---- state ----------------------------------------------------------- */
-  const { geo, retry: retryGeolocation } = useGeolocation();
+  const { geo, place, placeError, retry: retryGeolocation } = useGeolocation();
   const isOnline = useOnline();
 
   const [answers, setAnswers] = useState<Answers>({});
@@ -730,8 +769,10 @@ export default function CitizenIntakeForm({
     switch (geo.status) {
       case 'ready':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800">
-            📍 Location captured · {geo.latitude.toFixed(4)}, {geo.longitude.toFixed(4)}
+          <span className="inline-flex flex-wrap items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800">
+            📍 {place ? `Reported from ${place}` : 'Location captured'}
+            {!place && !placeError && <span>(finding city and state…)</span>}
+            {placeError && <span>({placeError})</span>}
           </span>
         );
       case 'locating':
