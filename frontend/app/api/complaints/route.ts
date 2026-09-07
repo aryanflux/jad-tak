@@ -319,6 +319,15 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
+  if (photoFiles.length > 0 && process.env.VERCEL === '1') {
+    return NextResponse.json(
+      {
+        error:
+          'Photo uploads are not configured for this deployment. Submit without photos, or configure external object storage first.',
+      },
+      { status: 503 }
+    );
+  }
 
   // ---- 7. resolve category code -> categories.id ----------------------------
   const requestedCategoryCode =
