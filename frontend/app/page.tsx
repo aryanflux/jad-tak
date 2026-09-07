@@ -8,6 +8,14 @@ import Link from 'next/link';
 
 const MODULES = [
   {
+    href: '/intake',
+    icon: '📝',
+    title: 'Citizen — Lodge a Complaint',
+    desc: 'Submit a civic issue with details, location, evidence and privacy preferences (Module 1).',
+    hint: 'no account required for prototype',
+    tone: 'border-blue-200 bg-blue-50/60',
+  },
+  {
     href: '/admin/complaints?admin=1',
     icon: '🗂️',
     title: 'Govt Admin — Complaint Queue',
