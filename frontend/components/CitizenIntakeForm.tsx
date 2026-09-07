@@ -308,6 +308,28 @@ interface ReverseGeocodeResponse {
   city?: string;
   locality?: string;
   principalSubdivision?: string;
+  localityInfo?: {
+    administrative?: Array<{ name?: string; description?: string }>;
+  };
+}
+
+function getResolvedPlace(data: ReverseGeocodeResponse): string | null {
+  const administrative = data.localityInfo?.administrative ?? [];
+  const city =
+    data.city ??
+    data.locality ??
+    administrative.find((item) =>
+      /city|town|municipality|village|district/i.test(
+        `${item.name ?? ''} ${item.description ?? ''}`
+      )
+    )?.name;
+  const state =
+    data.principalSubdivision ??
+    administrative.find((item) =>
+      /state|province|region/i.test(`${item.name ?? ''} ${item.description ?? ''}`)
+    )?.name;
+
+  return city && state ? `${city}, ${state}` : city ?? state ?? null;
 }
 
 function useGeolocation() {
@@ -366,9 +388,7 @@ function useGeolocation() {
         );
         if (!response.ok) throw new Error(`Reverse geocoding returned ${response.status}.`);
         const data = (await response.json()) as ReverseGeocodeResponse;
-        const city = data.city ?? data.locality;
-        const state = data.principalSubdivision;
-        setPlace(city && state ? `${city}, ${state}` : city ?? state ?? null);
+        setPlace(getResolvedPlace(data));
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') return;
         setPlace(null);
