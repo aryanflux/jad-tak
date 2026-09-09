@@ -266,6 +266,10 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
+  const submissionModeRaw = String(formData.get('submissionMode') ?? '').trim().toLowerCase();
+  const submissionMode =
+    submissionModeRaw === 'voice' || submissionModeRaw === 'image' ? submissionModeRaw : 'text';
+  const sourceLanguage = String(formData.get('sourceLanguage') ?? '').trim() || null;
 
   // ---- 4. privacy toggle (accept the component's 'privacy' or isAnonymous) --
   const privacyRaw = String(formData.get('privacy') ?? '').trim().toLowerCase();
@@ -408,13 +412,13 @@ export async function POST(request: NextRequest) {
       `INSERT INTO complaints (
            user_id, category_id, title, description,
            latitude, longitude,
-           is_anonymous, submission_mode, images, embedding,
+           is_anonymous, submission_mode, source_language, voice_transcript, images, embedding,
            cluster_id, cluster_score
        ) VALUES (
            $1, $2, $3, $4,
            $5, $6,
-           $7, $8, $9::jsonb, $10::vector,
-           $11, $12
+           $7, $8, $9, $10, $11::jsonb, $12::vector,
+           $13, $14
        )
        RETURNING id, status, created_at`,
       [
@@ -425,7 +429,9 @@ export async function POST(request: NextRequest) {
         latitude,
         longitude,
         isAnonymous,
-        photoFiles.length > 0 ? 'image' : 'text',
+        submissionMode,
+        submissionMode === 'voice' ? sourceLanguage : null,
+        submissionMode === 'voice' ? description : null,
         JSON.stringify([]),
         embedding ? `[${embedding.join(',')}]` : null,
         clusterId,

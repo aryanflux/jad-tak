@@ -75,6 +75,8 @@ const API_ROUTES = [
   ['GET /api/admin/solutions', 'Verification queue'],
   ['PATCH /api/admin/solutions/[id]/review', 'Prototype decision + notifications'],
   ['GET /api/admin/analytics', 'Aggregated impact metrics'],
+  ['POST /api/bhashini/transcribe', 'Optional voice-to-text intake'],
+  ['GET /api/geocode', 'Mappls reverse geocoding with fallback'],
 ];
 
 export default function HubPage() {

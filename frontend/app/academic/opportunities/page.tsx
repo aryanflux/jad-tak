@@ -144,7 +144,10 @@ function ClaimModal({ opportunity, onClose, onSubmitted }: ClaimModalProps) {
     try {
       const response = await fetch(API_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': String(Number(teamLeadUserId.trim())),
+        },
         body: JSON.stringify({
           complaintId: opportunity.id,
           teamName: teamName.trim(),
