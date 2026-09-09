@@ -1035,7 +1035,7 @@ export default function CitizenIntakeForm({
     switch (geo.status) {
       case 'ready':
         return (
-          <span className="inline-flex flex-wrap items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800">
+          <span className="inline-flex flex-wrap items-center gap-1.5 rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-800 ring-1 ring-teal-100">
             📍 {place ? `Reported from ${place}` : 'Location captured'}
             {!place && !placeError && <span>(finding city and state…)</span>}
             {placeError && <span>({placeError})</span>}
@@ -1043,14 +1043,14 @@ export default function CitizenIntakeForm({
         );
       case 'locating':
         return (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-3 py-1 text-xs font-medium text-sky-800">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-sky-500" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-800 ring-1 ring-indigo-100">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-indigo-500" />
             Detecting location…
           </span>
         );
       case 'denied':
         return (
-          <span className="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
+          <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800 ring-1 ring-amber-100">
             📍 Location blocked
             <button
               type="button"
@@ -1063,7 +1063,7 @@ export default function CitizenIntakeForm({
         );
       case 'unavailable':
         return (
-          <span className="inline-flex items-center gap-2 rounded-full bg-slate-200 px-3 py-1 text-xs font-medium text-slate-600">
+          <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-200">
             📍 Location unavailable
             <button
               type="button"
@@ -1153,7 +1153,7 @@ export default function CitizenIntakeForm({
                   key={option.code}
                   type="button"
                   onClick={() => chooseCategory(option)}
-                  className="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-left text-sm font-medium text-slate-800 shadow-sm transition hover:border-emerald-400 hover:bg-emerald-50 active:scale-[0.98]"
+                  className="rounded-2xl border border-slate-200 bg-white px-3 py-3 text-left text-sm font-medium text-slate-800 shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50 hover:shadow-md active:scale-[0.98]"
                 >
                   {option.label}
                 </button>
@@ -1170,7 +1170,7 @@ export default function CitizenIntakeForm({
               type="button"
               onClick={startVoiceIntake}
               disabled={recording || transcribing}
-              className="mt-3 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 disabled:opacity-50"
+              className="mt-3 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 transition-all hover:bg-indigo-100 disabled:opacity-50"
             >
               {transcribing ? 'Transcribing…' : '🎙️ Speak with Bhashini instead'}
             </button>
@@ -1185,7 +1185,7 @@ export default function CitizenIntakeForm({
               <button
                 type="button"
                 onClick={skipSubdivision}
-                className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+                className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
               >
                 Continue →
               </button>
@@ -1195,7 +1195,7 @@ export default function CitizenIntakeForm({
         return (
           <div className="mt-3">
             <select
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
               defaultValue=""
               onChange={(event) => {
                 const option = options.find((item) => item.code === event.target.value);
@@ -1225,7 +1225,7 @@ export default function CitizenIntakeForm({
         return (
           <div className="mt-3">
             <div className="flex items-center gap-3">
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-400 hover:bg-emerald-50 active:scale-[0.98]">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-md active:scale-[0.98]">
                 📷 {pickedPhotos.length > 0 ? 'Add more photos' : 'Attach a photo'}
                 <input
                   type="file"
@@ -1281,7 +1281,7 @@ export default function CitizenIntakeForm({
                 type="button"
                 onClick={finishPhotos}
                 disabled={pickedPhotos.length === 0 || processingPhotos}
-                className="rounded-full bg-emerald-600 px-4 py-1.5 text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-xl bg-indigo-600 px-4 py-2 text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {pickedPhotos.length > 0 ? 'Done — send photos' : 'Done'}
               </button>
@@ -1301,7 +1301,7 @@ export default function CitizenIntakeForm({
             <button
               type="button"
               onClick={() => choosePrivacy('public')}
-              className="flex items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3 text-left shadow-sm transition hover:border-emerald-400 hover:bg-emerald-50 active:scale-[0.98]"
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50 hover:shadow-md active:scale-[0.98]"
             >
               <span className="text-2xl">🙂</span>
               <span>
@@ -1316,7 +1316,7 @@ export default function CitizenIntakeForm({
             <button
               type="button"
               onClick={() => choosePrivacy('anonymous')}
-              className="flex items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3 text-left shadow-sm transition hover:border-emerald-400 hover:bg-emerald-50 active:scale-[0.98]"
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50 hover:shadow-md active:scale-[0.98]"
             >
               <span className="text-2xl">🕶️</span>
               <span>
@@ -1350,7 +1350,7 @@ export default function CitizenIntakeForm({
         <span
           aria-hidden
           className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm shadow-sm ${
-            from === 'user' ? 'bg-emerald-100' : 'bg-slate-200'
+            from === 'user' ? 'bg-indigo-100' : 'bg-slate-200'
           }`}
         >
           {from === 'user' ? '🧑' : '🏛️'}
@@ -1358,7 +1358,7 @@ export default function CitizenIntakeForm({
         <div
           className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
             from === 'user'
-              ? 'rounded-br-md bg-emerald-600 text-white'
+              ? 'rounded-br-md bg-indigo-600 text-white'
               : 'rounded-bl-md border border-slate-200 bg-white text-slate-800'
           }`}
         >
@@ -1370,13 +1370,13 @@ export default function CitizenIntakeForm({
 
   /* ------------------------------------------------------------------------ */
   return (
-    <div className="flex h-[100dvh] flex-col bg-slate-100">
+    <div className="flex h-[100dvh] flex-col bg-gradient-to-b from-slate-50 to-slate-100">
       {/* ---- header ---- */}
-      <header className="border-b border-slate-200 bg-white px-4 pb-2 pt-3 shadow-sm">
+      <header className="border-b border-slate-200 bg-white/85 px-4 pb-2 pt-3 shadow-sm backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-xl items-center justify-between gap-3">
           <div className="min-w-0">
             <h1 className="truncate text-base font-bold text-slate-900">
-              Report an issue
+              Community Intake
             </h1>
             <p className="text-xs text-slate-500">
               Step {Math.min(stepProgress + 1, STEP_ORDER.length)} of{' '}
@@ -1394,9 +1394,9 @@ export default function CitizenIntakeForm({
                 key={key}
                 className={`h-1 flex-1 rounded-full transition-colors ${
                   done
-                    ? 'bg-emerald-500'
+                    ? 'bg-indigo-500'
                     : active
-                      ? 'bg-emerald-300'
+                      ? 'bg-indigo-300'
                       : 'bg-slate-200'
                 }`}
               />
@@ -1419,8 +1419,8 @@ export default function CitizenIntakeForm({
           {bubble(
             'assistant',
             <p>
-              Namaste! 🙏 Tell us what's happening in your area and we'll route it
-              to the right department. This takes less than a minute.
+              Welcome. Tell us what is happening in your community and we&apos;ll route it
+              to the right team. This takes less than a minute.
             </p>
           )}
 
@@ -1450,7 +1450,7 @@ export default function CitizenIntakeForm({
 
           {/* ---- review + submit card ---- */}
           {allAnswered && !submitted && !duplicate && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="rounded-3xl border border-slate-200 bg-white/90 p-5 shadow-lg shadow-slate-200/50 backdrop-blur-md">
               <h2 className="text-sm font-bold text-slate-900">
                 Review &amp; submit
               </h2>
@@ -1471,7 +1471,7 @@ export default function CitizenIntakeForm({
                     <button
                       type="button"
                       onClick={() => editAnswer(key)}
-                      className="shrink-0 text-xs font-semibold text-emerald-700 underline underline-offset-2"
+                      className="shrink-0 text-xs font-semibold text-indigo-700 underline underline-offset-2"
                     >
                       Edit
                     </button>
@@ -1518,7 +1518,7 @@ export default function CitizenIntakeForm({
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting || !isOnline}
-                className="mt-4 w-full rounded-2xl bg-emerald-600 px-4 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-4 w-full rounded-2xl bg-indigo-600 px-4 py-3.5 text-sm font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-md active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting ? 'Submitting…' : 'Submit report →'}
               </button>
@@ -1568,23 +1568,23 @@ export default function CitizenIntakeForm({
 
           {/* ---- success ---- */}
           {submitted && (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center">
+            <div className="rounded-3xl border border-teal-200 bg-teal-50 p-5 text-center shadow-sm">
               <p className="text-3xl">🎉</p>
-              <h2 className="mt-2 text-base font-bold text-emerald-900">
+              <h2 className="mt-2 text-base font-bold text-teal-900">
                 Report submitted!
               </h2>
               {upvoteNote && (
-                <p className="mt-1 text-xs font-medium text-emerald-800">
+                <p className="mt-1 text-xs font-medium text-teal-800">
                   {upvoteNote}
                 </p>
               )}
-              <p className="mt-1 text-sm text-emerald-800">
+              <p className="mt-1 text-sm text-teal-800">
                 You'll get an email alert at every step of the resolution.
               </p>
               <button
                 type="button"
                 onClick={resetForm}
-                className="mt-4 rounded-full border border-emerald-300 bg-white px-5 py-2 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+                className="mt-4 rounded-xl border border-teal-300 bg-white px-5 py-2 text-sm font-semibold text-teal-800 transition hover:bg-teal-100"
               >
                 Report another issue
               </button>
@@ -1597,7 +1597,7 @@ export default function CitizenIntakeForm({
 
       {/* ---- composer (only for free-text steps) ---- */}
       {textStepActive && !submitted && (
-        <footer className="border-t border-slate-200 bg-white px-4 py-3 shadow-[0_-2px_8px_rgba(0,0,0,0.04)]">
+        <footer className="border-t border-slate-200 bg-white/90 px-4 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur-md">
           <div className="mx-auto w-full max-w-xl">
             {currentKey === 'title' ? (
               <div>
@@ -1615,13 +1615,13 @@ export default function CitizenIntakeForm({
                     maxLength={MAX_TITLE}
                     placeholder="e.g. Water pipeline leaking for a week"
                     autoFocus
-                    className="flex-1 rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200"
+                    className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200"
                   />
                   <button
                     type="button"
                     onClick={commitTitle}
                     disabled={!titleValid}
-                    className="rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Send
                   </button>
@@ -1667,13 +1667,13 @@ export default function CitizenIntakeForm({
                     rows={3}
                     placeholder="Describe the issue…"
                     autoFocus
-                    className="max-h-40 flex-1 resize-none rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200"
+                    className="max-h-40 flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200"
                   />
                   <button
                     type="button"
                     onClick={commitDescription}
                     disabled={!descriptionValid}
-                    className="rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Send
                   </button>
@@ -1730,7 +1730,7 @@ export default function CitizenIntakeForm({
                   </details>
                 )}
                 {distinctComplaint && (
-                  <p className="mt-2 text-xs font-medium text-emerald-700">
+                  <p className="mt-2 text-xs font-medium text-indigo-700">
                     This will be submitted as a new, distinct complaint.
                   </p>
                 )}
