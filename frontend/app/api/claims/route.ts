@@ -138,6 +138,14 @@ export async function GET() {
  * -------------------------------------------------------------------------- */
 
 export async function POST(request: NextRequest) {
+  const authenticatedUserId = Number(request.headers.get('x-user-id'));
+  if (!Number.isInteger(authenticatedUserId) || authenticatedUserId <= 0) {
+    return NextResponse.json(
+      { error: 'Missing or invalid x-user-id header. Authentication required.' },
+      { status: 401 }
+    );
+  }
+
   let pool;
   try {
     pool = getDbPool();
@@ -186,6 +194,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'teamLeadUserId must be a positive integer.' },
         { status: 400 }
+      );
+    }
+    if (teamLeadUserId !== authenticatedUserId) {
+      return NextResponse.json(
+        { error: 'The authenticated user must match the submitted team lead account.' },
+        { status: 403 }
       );
     }
 

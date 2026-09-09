@@ -51,7 +51,8 @@ export interface IntakePayload {
   categoryCode: string | null; // null = citizen skipped the optional category
   categoryLabel: string | null;
   isAnonymous: boolean;
-  submissionMode: 'text' | 'voice' | 'image'; // 'voice' reserved for the Bhashini pipeline
+  submissionMode: 'text' | 'voice' | 'image';
+  sourceLanguage: string | null;
   photos: WebpPhoto[];
   latitude: number | null;
   longitude: number | null;
@@ -223,6 +224,16 @@ function canvasToWebpBlob(
   return new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', quality));
 }
 
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+  }
+  return btoa(binary);
+}
+
 /**
  * Resizes + re-encodes an image to WebP, iterating over quality and
  * dimensions until the result is strictly below 500 KB.
@@ -382,13 +393,26 @@ function useGeolocation() {
     const lookup = async () => {
       try {
         setPlaceError(null);
-        const response = await fetch(
+        const mapplsResponse = await fetch(
+          `/api/geocode?latitude=${geo.latitude}&longitude=${geo.longitude}`,
+          { signal: controller.signal }
+        );
+        if (mapplsResponse.ok) {
+          const mapplsData = (await mapplsResponse.json()) as { place?: unknown };
+          if (typeof mapplsData.place === 'string' && mapplsData.place) {
+            setPlace(mapplsData.place);
+            return;
+          }
+        }
+
+        // Keep the location hint useful when Mappls is unavailable or unconfigured.
+        const fallbackResponse = await fetch(
           `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${geo.latitude}&longitude=${geo.longitude}&localityLanguage=en`,
           { signal: controller.signal }
         );
-        if (!response.ok) throw new Error(`Reverse geocoding returned ${response.status}.`);
-        const data = (await response.json()) as ReverseGeocodeResponse;
-        setPlace(getResolvedPlace(data));
+        if (!fallbackResponse.ok) throw new Error(`Reverse geocoding returned ${fallbackResponse.status}.`);
+        const fallbackData = (await fallbackResponse.json()) as ReverseGeocodeResponse;
+        setPlace(getResolvedPlace(fallbackData));
       } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') return;
         setPlace(null);
@@ -452,6 +476,11 @@ export default function CitizenIntakeForm({
   const [answers, setAnswers] = useState<Answers>({});
   const [draftTitle, setDraftTitle] = useState('');
   const [draftDescription, setDraftDescription] = useState('');
+  const [voiceLanguage, setVoiceLanguage] = useState('hi');
+  const [voiceUsed, setVoiceUsed] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
   const [pickedPhotos, setPickedPhotos] = useState<WebpPhoto[]>([]);
   const [processingPhotos, setProcessingPhotos] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
@@ -465,6 +494,8 @@ export default function CitizenIntakeForm({
   /* ---- refs ------------------------------------------------------------ */
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const objectUrlsRef = useRef<string[]>([]); // preview URLs to revoke on unmount
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   // Always keep the newest chat content in view.
   useEffect(() => {
@@ -515,6 +546,72 @@ export default function CitizenIntakeForm({
     setAnswers((prev) => ({ ...prev, description }));
     setDraftDescription('');
   };
+
+  const toggleRecording = async () => {
+    if (recording) {
+      recorderRef.current?.stop();
+      return;
+    }
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      setVoiceError('Voice recording is not supported in this browser.');
+      return;
+    }
+    setVoiceError(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+      recorder.onstop = async () => {
+        stream.getTracks().forEach((track) => track.stop());
+        setRecording(false);
+        setTranscribing(true);
+        try {
+          const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType });
+          const buffer = await blob.arrayBuffer();
+          const audio = arrayBufferToBase64(buffer);
+          const response = await fetch('/api/bhashini/transcribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              audio,
+              contentType: blob.type,
+              sourceLanguage: voiceLanguage,
+            }),
+          });
+          const data = (await response.json().catch(() => null)) as {
+            transcript?: string;
+            error?: string;
+          } | null;
+          if (!response.ok || !data?.transcript) {
+            throw new Error(data?.error ?? `Transcription failed (HTTP ${response.status}).`);
+          }
+          setVoiceUsed(true);
+          setDraftDescription((current) =>
+            current.trim() ? `${current.trim()} ${data.transcript}` : data.transcript ?? ''
+          );
+        } catch (error) {
+          setVoiceError(error instanceof Error ? error.message : 'Could not transcribe the recording.');
+        } finally {
+          setTranscribing(false);
+        }
+      };
+      recorderRef.current = recorder;
+      recorder.start();
+      setRecording(true);
+    } catch {
+      setVoiceError('Microphone permission was denied or unavailable.');
+    }
+  };
+
+  useEffect(
+    () => () => {
+      if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
+    },
+    []
+  );
 
   const chooseCategory = (option: CategoryOption) => {
     setAnswers((prev) => ({ ...prev, category: option }));
@@ -604,7 +701,8 @@ export default function CitizenIntakeForm({
       categoryCode: category?.code ?? null,
       categoryLabel: category?.label ?? null,
       isAnonymous: privacy === 'anonymous',
-      submissionMode: photos.length > 0 ? 'image' : 'text',
+      submissionMode: voiceUsed ? 'voice' : photos.length > 0 ? 'image' : 'text',
+      sourceLanguage: voiceUsed ? voiceLanguage : null,
       photos,
       latitude: coordsReady ? geo.latitude : null,
       longitude: coordsReady ? geo.longitude : null,
@@ -626,6 +724,8 @@ export default function CitizenIntakeForm({
     formData.append('description', payload.description);
     formData.append('categoryCode', payload.categoryCode ?? '');
     formData.append('privacy', payload.isAnonymous ? 'anonymous' : 'public');
+    formData.append('submissionMode', payload.submissionMode);
+    if (payload.sourceLanguage) formData.append('sourceLanguage', payload.sourceLanguage);
     if (payload.latitude !== null && payload.longitude !== null) {
       formData.append('latitude', String(payload.latitude));
       formData.append('longitude', String(payload.longitude));
@@ -1351,6 +1451,28 @@ export default function CitizenIntakeForm({
                     Send
                   </button>
                 </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <select
+                    value={voiceLanguage}
+                    onChange={(event) => setVoiceLanguage(event.target.value)}
+                    className="rounded-xl border border-slate-300 bg-white px-2 py-2 text-xs"
+                    aria-label="Voice language"
+                  >
+                    <option value="hi">Hindi</option>
+                    <option value="en">English</option>
+                    <option value="bn">Bengali</option>
+                    <option value="ta">Tamil</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={toggleRecording}
+                    disabled={transcribing}
+                    className="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 disabled:opacity-50"
+                  >
+                    {recording ? 'Stop recording' : transcribing ? 'Transcribing…' : 'Speak with Bhashini'}
+                  </button>
+                </div>
+                {voiceError && <p className="mt-1 text-xs text-red-600">{voiceError}</p>}
                 <p className="mt-1 pl-1 text-xs text-slate-400">
                   {draftDescription.trim().length > 0 &&
                   draftDescription.trim().length < MIN_DESCRIPTION
