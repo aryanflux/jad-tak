@@ -104,9 +104,21 @@ export async function POST(request: NextRequest) {
 
   const payload = (await response.json().catch(() => null)) as BhashiniResponse | null;
   if (!response.ok) {
-    console.error('[POST /api/bhashini/transcribe] Bhashini request failed:', response.status);
+    const providerError =
+      payload && typeof payload === 'object' && 'error' in payload
+        ? String((payload as { error?: unknown }).error ?? '')
+        : '';
+    console.error(
+      '[POST /api/bhashini/transcribe] Bhashini request failed:',
+      response.status,
+      providerError
+    );
     return NextResponse.json(
-      { error: 'Bhashini could not transcribe this recording.' },
+      {
+        error: providerError
+          ? `Bhashini rejected the recording: ${providerError}`
+          : 'Bhashini could not transcribe this recording.',
+      },
       { status: 502 }
     );
   }
