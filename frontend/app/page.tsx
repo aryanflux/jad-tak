@@ -1,133 +1,183 @@
-import Link from 'next/link';
+'use client';
 
-/* ============================================================================
- * Jhar Samadhan — module hub (/) for the SIH 26043 ecosystem.
- * Routes to every UI with its demo-auth hint pre-filled (identity headers are
- * stubbed with query params until real sessions exist — see each page header).
- * ==========================================================================*/
+import { FormEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-const MODULES = [
-  {
-    href: '/intake',
-    icon: '📝',
-    title: 'Citizen — Lodge a Complaint',
-    desc: 'Submit a civic issue with details, location, evidence and privacy preferences (Module 1).',
-    hint: 'no account required for prototype',
-    tone: 'border-blue-200 bg-blue-50/60',
-  },
-  {
-    href: '/admin/complaints?admin=1',
-    icon: '🗂️',
-    title: 'Govt Admin — Complaint Queue',
-    desc: 'Filter complaints by workflow status & domain, inspect duplicates and advance the state machine (Module 3).',
-    hint: '?admin=1 (govt_admin)',
-    tone: 'border-indigo-200 bg-indigo-50/60',
-  },
-  {
-    href: '/academic/opportunities',
-    icon: '🎓',
-    title: 'Academic Opportunities Board',
-    desc: 'Universities browse validated problems and adopt them with a formal proposal (Module 4).',
-    hint: 'adoptable complaints, no auth needed to browse',
-    tone: 'border-emerald-200 bg-emerald-50/60',
-  },
-  {
-    href: '/industry/marketplace?pid=2',
-    icon: '🤝',
-    title: 'Industry & CSR Marketplace',
-    desc: 'CSR / startups / MSMEs pledge grants, mentorship and pilots against approved prototypes (Module 5).',
-    hint: '?pid=2 CSR · ?pid=3 startup · ?pid=4 MSME',
-    tone: 'border-violet-200 bg-violet-50/60',
-  },
-  {
-    href: '/academic/solutions?uid=5',
-    icon: '🧪',
-    title: 'Solution Submission Portal',
-    desc: 'Approved teams submit versioned prototype documentation for verification (Module 6).',
-    hint: '?uid=<team lead id>',
-    tone: 'border-emerald-200 bg-emerald-50/60',
-  },
-  {
-    href: '/admin/solutions?admin=1',
-    icon: '✅',
-    title: 'Govt Admin — Verification Queue',
-    desc: 'Review prototypes, test links, approve / reject / request revision and close the loop (Module 7).',
-    hint: '?admin=1 (govt_admin)',
-    tone: 'border-amber-200 bg-amber-50/60',
-  },
-  {
-    href: '/admin/analytics?admin=1',
-    icon: '📊',
-    title: 'Analytics Command Center',
-    desc: 'District & domain KPIs, pendency brackets, HEI participation, funding and export (Module 8).',
-    hint: '?admin=1 (govt_admin)',
-    tone: 'border-slate-300 bg-slate-100/70',
-  },
+type Role = 'citizen' | 'govt_admin' | 'institution' | 'student' | 'ngo' | 'csr';
+
+const ROLE_OPTIONS: Array<{ value: Role; label: string }> = [
+  { value: 'citizen', label: 'Citizen' },
+  { value: 'govt_admin', label: 'Government Admin' },
+  { value: 'institution', label: 'Institution' },
+  { value: 'student', label: 'Student' },
+  { value: 'ngo', label: 'NGO' },
+  { value: 'csr', label: 'Corporate / CSR' },
 ];
 
-const API_ROUTES = [
-  ['POST /api/complaints', 'Citizen intake (multipart WebP + geo)'],
-  ['GET /api/admin/complaints', 'Admin complaint queue'],
-  ['POST /api/admin/complaints/[id]/advance', 'State-machine advance'],
-  ['GET+POST /api/claims', 'Opportunities board + claim ingestion'],
-  ['GET+POST /api/solutions', 'Solution portal + iteration ingestion'],
-  ['GET+POST /api/industry/partnerships', 'Marketplace catalog + pledges'],
-  ['GET /api/admin/solutions', 'Verification queue'],
-  ['PATCH /api/admin/solutions/[id]/review', 'Prototype decision + notifications'],
-  ['GET /api/admin/analytics', 'Aggregated impact metrics'],
-  ['POST /api/bhashini/transcribe', 'Optional voice-to-text intake'],
-  ['GET /api/geocode', 'Mappls reverse geocoding with fallback'],
-];
+const ROUTES: Record<Role, string> = {
+  citizen: '/intake',
+  govt_admin: '/admin/complaints?admin=1',
+  institution: '/academic/opportunities?uid=5',
+  student: '/academic/opportunities?uid=5',
+  ngo: '/industry/marketplace?pid=2',
+  csr: '/industry/marketplace?pid=2',
+};
 
-export default function HubPage() {
+export default function HomePage() {
+  const router = useRouter();
+  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in');
+  const [role, setRole] = useState<Role | ''>('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!role) return;
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const registeredRoles = JSON.parse(
+      window.localStorage.getItem('jhar-samadhan-registered-roles') ?? '{}'
+    ) as Record<string, Role>;
+    const registeredRole = registeredRoles[normalizedEmail];
+
+    if (mode === 'sign-up' && registeredRole) {
+      setError(
+        registeredRole === role
+          ? 'This email is already registered. Switch to Sign in.'
+          : `This email is already registered as ${registeredRole}. One email can only use one role.`
+      );
+      return;
+    }
+
+    if (mode === 'sign-in' && registeredRole && registeredRole !== role) {
+      setError(`This email is registered as ${registeredRole}. Select that role to continue.`);
+      return;
+    }
+
+    registeredRoles[normalizedEmail] = role;
+    window.localStorage.setItem('jhar-samadhan-registered-roles', JSON.stringify(registeredRoles));
+    setError(null);
+    setLoading(true);
+    window.localStorage.setItem('jhar-samadhan-role', role);
+    window.localStorage.setItem(
+      'jhar-samadhan-session',
+      JSON.stringify({ email: normalizedEmail, role })
+    );
+
+    window.setTimeout(() => {
+      router.push(ROUTES[role]);
+    }, 350);
+  };
+
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-10">
-      <header className="text-center">
-        <p className="text-xs font-semibold uppercase tracking-widest text-indigo-700">
-          SIH 26043 · Government of Jharkhand
-        </p>
-        <h1 className="mt-1 text-3xl font-bold text-slate-900">
-          Jhar Samadhan — Module Hub
-        </h1>
-        <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-500">
-          Crowdsourcing-to-resolution ecosystem. Pick a module to open its UI —
-          each card pre-fills the demo identity (admin / partner / team lead)
-          used until real session auth lands.
-        </p>
-      </header>
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100 px-4 py-8 sm:py-12">
+      <div className="mx-auto grid w-full max-w-6xl items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="px-1 sm:px-6">
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-indigo-700">
+            SIH26 · Government of Jharkhand
+          </p>
+          <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">
+            Jhar-Samadhaan
+          </h1>
+          <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600">
+            One civic ecosystem for reporting problems, discovering solutions, and turning
+            community ideas into measurable action.
+          </p>
+          <div className="mt-8 grid max-w-xl gap-3 text-sm text-slate-700 sm:grid-cols-3">
+            <div className="rounded-2xl border border-blue-100 bg-white/80 p-4 shadow-sm">
+              Report issues
+            </div>
+            <div className="rounded-2xl border border-blue-100 bg-white/80 p-4 shadow-sm">
+              Collaborate
+            </div>
+            <div className="rounded-2xl border border-blue-100 bg-white/80 p-4 shadow-sm">
+              Track impact
+            </div>
+          </div>
+        </section>
 
-      <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {MODULES.map((module) => (
-          <Link
-            key={module.href}
-            href={module.href}
-            className={`rounded-2xl border p-5 shadow-sm ring-1 ring-transparent transition hover:-translate-y-0.5 hover:shadow-md ${module.tone}`}
+        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
+          <h2 className="text-2xl font-bold text-slate-950">
+            {mode === 'sign-in' ? 'Welcome back' : 'Join Jhar-Samadhaan'}
+          </h2>
+          <p className="mt-2 text-sm text-slate-500">
+            Select your role to open the right workspace.
+          </p>
+
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            <label className="block text-sm font-semibold text-slate-700">
+              I am signing in as
+              <select
+                required
+                value={role}
+                onChange={(event) => setRole(event.target.value as Role)}
+                className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 font-normal outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              >
+                <option value="" disabled>
+                  Choose your role
+                </option>
+                {ROLE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="block text-sm font-semibold text-slate-700">
+              Email
+              <input
+                required
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@example.com"
+                className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              />
+            </label>
+
+            <label className="block text-sm font-semibold text-slate-700">
+              Password
+              <input
+                required
+                minLength={6}
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="At least 6 characters"
+                className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              />
+            </label>
+
+            {error && (
+              <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading || !role}
+              className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loading ? 'Opening your workspace…' : mode === 'sign-in' ? 'Sign in' : 'Create account'}
+            </button>
+          </form>
+
+          <button
+            type="button"
+            onClick={() => setMode(mode === 'sign-in' ? 'sign-up' : 'sign-in')}
+            className="mt-5 w-full text-sm font-semibold text-indigo-700 hover:text-indigo-900"
           >
-            <p className="text-2xl">{module.icon}</p>
-            <h2 className="mt-2 text-sm font-bold text-slate-900">{module.title}</h2>
-            <p className="mt-1 text-xs leading-relaxed text-slate-600">{module.desc}</p>
-            <p className="mt-3 inline-block rounded-full bg-white/80 px-2.5 py-1 font-mono text-[10px] text-slate-500 ring-1 ring-slate-200">
-              {module.hint}
-            </p>
-          </Link>
-        ))}
-      </section>
-
-      <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900">API surface</h2>
-        <p className="mt-0.5 text-xs text-slate-400">
-          All handlers require a <code className="font-mono">DATABASE_URL</code> and send identity via the
-          <code className="font-mono"> x-admin-id</code> / <code className="font-mono">x-user-id</code> headers.
-        </p>
-        <div className="mt-3 grid gap-x-8 gap-y-1 sm:grid-cols-2">
-          {API_ROUTES.map(([route, desc]) => (
-            <p key={route} className="text-xs">
-              <code className="font-semibold text-indigo-700">{route}</code>
-              <span className="ml-2 text-slate-500">{desc}</span>
-            </p>
-          ))}
-        </div>
-      </section>
+            {mode === 'sign-in' ? 'New here? Create an account' : 'Already registered? Sign in'}
+          </button>
+          <p className="mt-4 text-center text-xs text-slate-400">
+            Prototype gateway · your selected role is saved for this browser session
+          </p>
+        </section>
+      </div>
     </main>
   );
 }
