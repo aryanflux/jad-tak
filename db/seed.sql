@@ -74,6 +74,23 @@ INSERT INTO categories (code, name, description) VALUES
   ('SWM', 'Waste Management', 'Garbage collection, dumping yards and cleanliness'),
   ('OTH', 'Other / Citizen Services', 'Anything not covered by the domains above');
 
+INSERT INTO categories (code, name, description, parent_id) VALUES
+  ('AGR_IRR', 'Irrigation & Water Access', 'Canals, borewells and farm water supply', (SELECT id FROM categories WHERE code = 'AGR')),
+  ('AGR_CROP', 'Crops, Seeds & Subsidies', 'Crop damage, seeds, MSP and subsidies', (SELECT id FROM categories WHERE code = 'AGR')),
+  ('WAT_SUP', 'Drinking Water Supply', 'Pipelines, handpumps and water availability', (SELECT id FROM categories WHERE code = 'WAT')),
+  ('WAT_DRAIN', 'Drainage & Sewage', 'Blocked drains, flooding and sewage', (SELECT id FROM categories WHERE code = 'WAT')),
+  ('HLT_FAC', 'Health Facilities', 'Hospitals, PHCs and clinics', (SELECT id FROM categories WHERE code = 'HLT')),
+  ('HLT_MED', 'Medicines & Emergency Care', 'Medicines, ambulances and urgent care', (SELECT id FROM categories WHERE code = 'HLT')),
+  ('EDU_SCH', 'Schools & Teachers', 'School buildings, teachers and classrooms', (SELECT id FROM categories WHERE code = 'EDU')),
+  ('EDU_AID', 'Scholarships & Student Services', 'Scholarships, meals and student support', (SELECT id FROM categories WHERE code = 'EDU')),
+  ('PWR_SUP', 'Electricity Supply', 'Outages, transformers and voltage', (SELECT id FROM categories WHERE code = 'PWR')),
+  ('PWR_LIGHT', 'Street Lighting', 'Streetlights, poles and public lighting', (SELECT id FROM categories WHERE code = 'PWR')),
+  ('INF_ROAD', 'Roads & Potholes', 'Road repairs, potholes and pavements', (SELECT id FROM categories WHERE code = 'INF')),
+  ('INF_BRIDGE', 'Bridges & Public Works', 'Bridges, culverts and construction', (SELECT id FROM categories WHERE code = 'INF')),
+  ('SWM_COLLECTION', 'Garbage Collection', 'Collection schedules, bins and litter', (SELECT id FROM categories WHERE code = 'SWM')),
+  ('SWM_DUMP', 'Dumping & Cleanliness', 'Illegal dumping, waste sites and odour', (SELECT id FROM categories WHERE code = 'SWM')),
+  ('OTH_SERVICES', 'Other Citizen Services', 'General civic services and support', (SELECT id FROM categories WHERE code = 'OTH'));
+
 -- ============================================================================
 -- 2. USERS — RBAC roles across the whole ecosystem
 --    ids 1-4 are fixed demo accounts (admin / CSR / startup / MSME)
