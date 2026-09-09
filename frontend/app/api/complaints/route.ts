@@ -270,6 +270,8 @@ export async function POST(request: NextRequest) {
   const submissionMode =
     submissionModeRaw === 'voice' || submissionModeRaw === 'image' ? submissionModeRaw : 'text';
   const sourceLanguage = String(formData.get('sourceLanguage') ?? '').trim() || null;
+  const distinctComplaint =
+    formData.get('distinctComplaint') === 'true' || formData.get('distinctComplaint') === '1';
 
   // ---- 4. privacy toggle (accept the component's 'privacy' or isAnonymous) --
   const privacyRaw = String(formData.get('privacy') ?? '').trim().toLowerCase();
@@ -335,7 +337,7 @@ export async function POST(request: NextRequest) {
 
   // ---- 7. resolve category code -> categories.id ----------------------------
   const requestedCategoryCode =
-    String(formData.get('categoryCode') ?? '').trim().toUpperCase() ||
+    String(formData.get('subdivisionCode') ?? formData.get('categoryCode') ?? '').trim().toUpperCase() ||
     FALLBACK_CATEGORY_CODE;
 
   // ---- 8. embed complaint text via Ayaan's FastAPI SBERT microservice ---------
@@ -386,7 +388,7 @@ export async function POST(request: NextRequest) {
     // gets the cluster_id; the parent complaint itself stays the cluster head.
     let clusterId: number | null = null;
     let clusterScore: number | null = null;
-    if (embedding) {
+    if (embedding && !distinctComplaint) {
       const embeddingLiteral = `[${embedding.join(',')}]`; // pgvector literal
       const duplicateResult = await client.query<DuplicateCandidateRow>(
         `SELECT id,

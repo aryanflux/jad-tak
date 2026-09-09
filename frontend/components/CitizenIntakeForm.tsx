@@ -35,6 +35,12 @@ export interface CategoryOption {
   label: string;
 }
 
+interface SubdivisionOption {
+  code: string;
+  name: string;
+  parentCode: string;
+}
+
 export interface WebpPhoto {
   /** Ready-to-upload WebP file, guaranteed < 500 KB. */
   file: File;
@@ -50,6 +56,7 @@ export interface IntakePayload {
   description: string;
   categoryCode: string | null; // null = citizen skipped the optional category
   categoryLabel: string | null;
+  subdivisionCode: string | null;
   isAnonymous: boolean;
   submissionMode: 'text' | 'voice' | 'image';
   sourceLanguage: string | null;
@@ -113,16 +120,18 @@ const MAX_TITLE = 300;
 const MIN_DESCRIPTION = 10;
 
 type StepKey =
+  | 'category'
+  | 'subdivision'
   | 'title'
   | 'description'
-  | 'category'
   | 'photos'
   | 'privacy';
 
 const STEP_ORDER: StepKey[] = [
+  'category',
+  'subdivision',
   'title',
   'description',
-  'category',
   'photos',
   'privacy',
 ];
@@ -141,7 +150,11 @@ const STEP_META: Record<
   },
   category: {
     question: 'Does it fit one of these categories?',
-    hint: "Optional — we can also figure it out ourselves.",
+    hint: 'Start here so we can show more relevant reported problems.',
+  },
+  subdivision: {
+    question: 'Which subdivision best matches the issue?',
+    hint: 'Optional — choose the closest one.',
   },
   photos: {
     question: 'Add a photo as evidence?',
@@ -160,9 +173,10 @@ const PRIVACY_LABEL: Record<Privacy, string> = {
 };
 
 const REVIEW_LABELS: Record<StepKey, string> = {
+  category: 'Category',
+  subdivision: 'Subdivision',
   title: 'Issue title',
   description: 'Description',
-  category: 'Category',
   photos: 'Evidence',
   privacy: 'Privacy',
 };
@@ -457,6 +471,7 @@ function useOnline(): boolean {
 type AnswerValue =
   | string
   | CategoryOption
+  | SubdivisionOption
   | null
   | WebpPhoto[]
   | Privacy;
@@ -474,6 +489,8 @@ export default function CitizenIntakeForm({
   const isOnline = useOnline();
 
   const [answers, setAnswers] = useState<Answers>({});
+  const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>(CATEGORY_OPTIONS);
+  const [subdivisions, setSubdivisions] = useState<SubdivisionOption[]>([]);
   const [draftTitle, setDraftTitle] = useState('');
   const [draftDescription, setDraftDescription] = useState('');
   const [voiceLanguage, setVoiceLanguage] = useState('hi');
@@ -481,6 +498,11 @@ export default function CitizenIntakeForm({
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [similarComplaints, setSimilarComplaints] = useState<
+    Array<{ id: number; title: string; description: string; status: string; category: string; similarity: number }>
+  >([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(false);
+  const [distinctComplaint, setDistinctComplaint] = useState(false);
   const [pickedPhotos, setPickedPhotos] = useState<WebpPhoto[]>([]);
   const [processingPhotos, setProcessingPhotos] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
@@ -519,6 +541,51 @@ export default function CitizenIntakeForm({
     const urls = objectUrlsRef.current;
     return () => urls.forEach((url) => URL.revokeObjectURL(url));
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/categories')
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: { categories?: Array<{ code: string; name: string }>; subdivisions?: SubdivisionOption[] } | null) => {
+        if (!active || !data) return;
+        if (Array.isArray(data.categories) && data.categories.length > 0) {
+          setCategoryOptions(data.categories.map((item) => ({ code: item.code, label: item.name })));
+        }
+        if (Array.isArray(data.subdivisions)) setSubdivisions(data.subdivisions);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const text = draftDescription.trim();
+    if (text.length < MIN_DESCRIPTION || distinctComplaint) {
+      setSimilarComplaints([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setLoadingSimilar(true);
+      try {
+        const category = answers.category as CategoryOption | null | undefined;
+        const response = await fetch('/api/complaints/similar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, categoryCode: category?.code ?? null }),
+        });
+        const data = (await response.json().catch(() => null)) as {
+          complaints?: typeof similarComplaints;
+        } | null;
+        setSimilarComplaints(Array.isArray(data?.complaints) ? data.complaints : []);
+      } catch {
+        setSimilarComplaints([]);
+      } finally {
+        setLoadingSimilar(false);
+      }
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [answers.category, distinctComplaint, draftDescription]);
 
   /* ---- derived step progression ---------------------------------------- */
   const answeredKeys = STEP_ORDER.filter((key) => answers[key] !== undefined);
@@ -619,7 +686,12 @@ export default function CitizenIntakeForm({
 
   const startVoiceIntake = () => {
     voiceStartedFromInitialRef.current = true;
-    setAnswers((current) => ({ ...current, title: 'Voice complaint' }));
+    setAnswers((current) => ({
+      ...current,
+      category: null,
+      subdivision: null,
+      title: 'Voice complaint',
+    }));
     setTimeout(() => void toggleRecording(), 0);
   };
 
@@ -631,11 +703,19 @@ export default function CitizenIntakeForm({
   );
 
   const chooseCategory = (option: CategoryOption) => {
-    setAnswers((prev) => ({ ...prev, category: option }));
+    setAnswers((prev) => ({ ...prev, category: option, subdivision: undefined }));
   };
 
   const skipCategory = () => {
-    setAnswers((prev) => ({ ...prev, category: null }));
+    setAnswers((prev) => ({ ...prev, category: null, subdivision: null }));
+  };
+
+  const chooseSubdivision = (option: SubdivisionOption) => {
+    setAnswers((prev) => ({ ...prev, subdivision: option }));
+  };
+
+  const skipSubdivision = () => {
+    setAnswers((prev) => ({ ...prev, subdivision: null }));
   };
 
   const choosePrivacy = (privacy: Privacy) => {
@@ -708,6 +788,7 @@ export default function CitizenIntakeForm({
     if (typeof title !== 'string' || typeof description !== 'string') return null;
 
     const category = answers.category as CategoryOption | null | undefined;
+    const subdivision = answers.subdivision as SubdivisionOption | null | undefined;
     const privacy = answers.privacy as Privacy | undefined;
     const photos = (answers.photos as WebpPhoto[] | null | undefined) ?? [];
     const coordsReady = geo.status === 'ready';
@@ -717,6 +798,7 @@ export default function CitizenIntakeForm({
       description: description.trim(),
       categoryCode: category?.code ?? null,
       categoryLabel: category?.label ?? null,
+      subdivisionCode: subdivision?.code ?? null,
       isAnonymous: privacy === 'anonymous',
       submissionMode: voiceUsed ? 'voice' : photos.length > 0 ? 'image' : 'text',
       sourceLanguage: voiceUsed ? voiceLanguage : null,
@@ -740,7 +822,9 @@ export default function CitizenIntakeForm({
     formData.append('title', payload.title);
     formData.append('description', payload.description);
     formData.append('categoryCode', payload.categoryCode ?? '');
+    if (payload.subdivisionCode) formData.append('subdivisionCode', payload.subdivisionCode);
     formData.append('privacy', payload.isAnonymous ? 'anonymous' : 'public');
+    formData.append('distinctComplaint', distinctComplaint ? 'true' : 'false');
     formData.append('submissionMode', payload.submissionMode);
     if (payload.sourceLanguage) formData.append('sourceLanguage', payload.sourceLanguage);
     if (payload.latitude !== null && payload.longitude !== null) {
@@ -966,6 +1050,10 @@ export default function CitizenIntakeForm({
           <p className="italic opacity-70">Skipped — left for AI triage</p>
         );
       }
+      case 'subdivision': {
+        const subdivision = value as SubdivisionOption | null;
+        return subdivision ? <p>{subdivision.name}</p> : <p className="italic opacity-70">Skipped</p>;
+      }
       case 'photos': {
         const photos = value as WebpPhoto[] | null;
         if (!photos || photos.length === 0) {
@@ -1015,7 +1103,7 @@ export default function CitizenIntakeForm({
         return (
           <div className="mt-3">
             <div className="grid grid-cols-2 gap-2">
-              {CATEGORY_OPTIONS.map((option) => (
+              {categoryOptions.map((option) => (
                 <button
                   key={option.code}
                   type="button"
@@ -1033,8 +1121,61 @@ export default function CitizenIntakeForm({
             >
               Skip for now →
             </button>
+            <button
+              type="button"
+              onClick={startVoiceIntake}
+              disabled={recording || transcribing}
+              className="mt-3 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 disabled:opacity-50"
+            >
+              {transcribing ? 'Transcribing…' : '🎙️ Speak with Bhashini instead'}
+            </button>
           </div>
         );
+      case 'subdivision': {
+        const category = answers.category as CategoryOption | null | undefined;
+        const options = subdivisions.filter((item) => item.parentCode === category?.code);
+        if (options.length === 0) {
+          return (
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={skipSubdivision}
+                className="rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+              >
+                Continue →
+              </button>
+            </div>
+          );
+        }
+        return (
+          <div className="mt-3">
+            <select
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm"
+              defaultValue=""
+              onChange={(event) => {
+                const option = options.find((item) => item.code === event.target.value);
+                if (option) chooseSubdivision(option);
+              }}
+            >
+              <option value="" disabled>
+                Select a subdivision
+              </option>
+              {options.map((option) => (
+                <option key={option.code} value={option.code}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={skipSubdivision}
+              className="mt-3 text-sm font-medium text-slate-500 underline underline-offset-2"
+            >
+              Skip for now →
+            </button>
+          </div>
+        );
+      }
       case 'photos':
         return (
           <div className="mt-3">
@@ -1513,6 +1654,41 @@ export default function CitizenIntakeForm({
                     {recording ? 'Stop recording' : transcribing ? 'Transcribing…' : 'Speak with Bhashini'}
                   </button>
                 </div>
+                {loadingSimilar && (
+                  <p className="mt-2 text-xs text-slate-400">Looking for related reported problems…</p>
+                )}
+                {similarComplaints.length > 0 && (
+                  <details className="mt-2 rounded-xl border border-indigo-200 bg-indigo-50/60 p-3">
+                    <summary className="cursor-pointer text-xs font-semibold text-indigo-800">
+                      {similarComplaints.length} related problem{similarComplaints.length > 1 ? 's' : ''} found
+                    </summary>
+                    <div className="mt-2 space-y-2">
+                      {similarComplaints.map((complaint) => (
+                        <details key={complaint.id} className="rounded-lg bg-white p-2 text-xs">
+                          <summary className="cursor-pointer font-semibold text-slate-800">
+                            #{complaint.id} {complaint.title} · {Math.round(complaint.similarity * 100)}% related
+                          </summary>
+                          <p className="mt-1 text-slate-600">{complaint.description}</p>
+                        </details>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDistinctComplaint(true);
+                          setSimilarComplaints([]);
+                        }}
+                        className="text-xs font-semibold text-indigo-700 underline underline-offset-2"
+                      >
+                        None match — create a distinct complaint
+                      </button>
+                    </div>
+                  </details>
+                )}
+                {distinctComplaint && (
+                  <p className="mt-2 text-xs font-medium text-emerald-700">
+                    This will be submitted as a new, distinct complaint.
+                  </p>
+                )}
                 {voiceError && <p className="mt-1 text-xs text-red-600">{voiceError}</p>}
                 <p className="mt-1 pl-1 text-xs text-slate-400">
                   {draftDescription.trim().length > 0 &&
