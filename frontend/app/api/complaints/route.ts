@@ -3,6 +3,7 @@ import { Pool } from 'pg';
 import { promises as fs } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { getSbertEmbedUrl } from '../../../lib/sbert';
 
 /* ============================================================================
  * POST /api/complaints
@@ -49,8 +50,6 @@ const FALLBACK_CATEGORY_CODE = 'OTH';
 // Semantic deduplication (pgvector + SBERT microservice)
 const EMBEDDING_DIM = 384; // all-MiniLM-L6-v2 VECTOR(384)
 const SIMILARITY_THRESHOLD = 0.82; // cosine similarity >= 0.82 counts as a duplicate
-const SBERT_SERVICE_URL =
-  process.env.SBERT_SERVICE_URL ?? 'http://localhost:8000';
 const SBERT_TIMEOUT_MS = 10_000;
 const MAX_EMBED_TEXT_LENGTH = 4000; // keep the request inside the model token window
 const DEDUPE_WINDOW_DAYS = Number(process.env.DEDUPE_WINDOW_DAYS ?? 90) || 90;
@@ -146,7 +145,8 @@ async function requestEmbedding(text: string): Promise<number[] | null> {
   const searchText = text.trim().slice(0, MAX_EMBED_TEXT_LENGTH);
   if (!searchText) return null;
 
-  const url = `${SBERT_SERVICE_URL}/api/v1/embed`;
+  const url = getSbertEmbedUrl();
+  if (!url) return null;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), SBERT_TIMEOUT_MS);
   try {

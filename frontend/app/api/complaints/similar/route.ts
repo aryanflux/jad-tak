@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDbPool } from '../../../../lib/db';
+import { getSbertEmbedUrl } from '../../../../lib/sbert';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+const SBERT_TIMEOUT_MS = 10_000;
 
 export async function POST(request: NextRequest) {
   let body: { text?: unknown; categoryCode?: unknown };
@@ -14,21 +16,28 @@ export async function POST(request: NextRequest) {
   const text = typeof body.text === 'string' ? body.text.trim().slice(0, 4000) : '';
   if (text.length < 10) return NextResponse.json({ complaints: [] });
 
-  const embeddingResponse = await fetch(
-    `${process.env.SBERT_SERVICE_URL ?? 'http://localhost:8000/api/v1/embed'}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    }
-  );
-  if (!embeddingResponse.ok) return NextResponse.json({ complaints: [] });
-  const embeddingPayload = (await embeddingResponse.json()) as { embedding?: unknown };
-  if (!Array.isArray(embeddingPayload.embedding) || embeddingPayload.embedding.length !== 384) {
-    return NextResponse.json({ complaints: [] });
-  }
-
   try {
+    const sbertUrl = getSbertEmbedUrl();
+    if (!sbertUrl) return NextResponse.json({ complaints: [] });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), SBERT_TIMEOUT_MS);
+    let embeddingResponse: Response;
+    try {
+      embeddingResponse = await fetch(sbertUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+    if (!embeddingResponse.ok) return NextResponse.json({ complaints: [] });
+    const embeddingPayload = (await embeddingResponse.json()) as { embedding?: unknown };
+    if (!Array.isArray(embeddingPayload.embedding) || embeddingPayload.embedding.length !== 384) {
+      return NextResponse.json({ complaints: [] });
+    }
+
     const pool = getDbPool();
     const categoryCode =
       typeof body.categoryCode === 'string' ? body.categoryCode.trim().toUpperCase() : null;
