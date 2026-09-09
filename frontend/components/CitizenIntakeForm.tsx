@@ -496,6 +496,7 @@ export default function CitizenIntakeForm({
   const objectUrlsRef = useRef<string[]>([]); // preview URLs to revoke on unmount
   const recorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const voiceStartedFromInitialRef = useRef(false);
 
   // Always keep the newest chat content in view.
   useEffect(() => {
@@ -589,6 +590,15 @@ export default function CitizenIntakeForm({
             throw new Error(data?.error ?? `Transcription failed (HTTP ${response.status}).`);
           }
           setVoiceUsed(true);
+          if (voiceStartedFromInitialRef.current) {
+            const transcript = data.transcript.trim();
+            const firstSentence = transcript.split(/[.!?]\s+/)[0]?.trim() ?? transcript;
+            setAnswers((current) => ({
+              ...current,
+              title: (firstSentence || 'Voice complaint').slice(0, MAX_TITLE),
+            }));
+            voiceStartedFromInitialRef.current = false;
+          }
           setDraftDescription((current) =>
             current.trim() ? `${current.trim()} ${data.transcript}` : data.transcript ?? ''
           );
@@ -598,12 +608,19 @@ export default function CitizenIntakeForm({
           setTranscribing(false);
         }
       };
+
       recorderRef.current = recorder;
       recorder.start();
       setRecording(true);
     } catch {
       setVoiceError('Microphone permission was denied or unavailable.');
     }
+  };
+
+  const startVoiceIntake = () => {
+    voiceStartedFromInitialRef.current = true;
+    setAnswers((current) => ({ ...current, title: 'Voice complaint' }));
+    setTimeout(() => void toggleRecording(), 0);
   };
 
   useEffect(
@@ -1429,6 +1446,30 @@ export default function CitizenIntakeForm({
                   draftTitle.trim().length < MIN_TITLE
                     ? `at least ${MIN_TITLE} characters`
                     : ''}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <select
+                    value={voiceLanguage}
+                    onChange={(event) => setVoiceLanguage(event.target.value)}
+                    className="rounded-xl border border-slate-300 bg-white px-2 py-2 text-xs"
+                    aria-label="Voice language"
+                  >
+                    <option value="hi">Hindi</option>
+                    <option value="en">English</option>
+                    <option value="bn">Bengali</option>
+                    <option value="ta">Tamil</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={startVoiceIntake}
+                    disabled={recording || transcribing}
+                    className="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 disabled:opacity-50"
+                  >
+                    {transcribing ? 'Transcribing…' : 'Speak with Bhashini'}
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-slate-400">
+                  Or speak your complaint and we&apos;ll fill in the details.
                 </p>
               </div>
             ) : (
