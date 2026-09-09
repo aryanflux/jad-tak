@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: civic-resolve-sbert
+    runtime: docker
+    rootDir: ml
+    plan: starter
+    healthCheckPath: /health
