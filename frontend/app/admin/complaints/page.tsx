@@ -660,10 +660,6 @@ function ComplaintQueue() {
             <h1 className="mt-1 text-2xl font-bold text-slate-900">
               Complaint Resolution Queue
             </h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Showing {filteredComplaints.length} of {complaints.length} complaint
-              {complaints.length === 1 ? '' : 's'} · auto-audited state machine
-            </p>
           </div>
           <button
             type="button"
