@@ -108,6 +108,24 @@ export const CATEGORY_OPTIONS: CategoryOption[] = [
   { code: 'OTH', label: 'Something else' },
 ];
 
+const SUBDIVISION_OPTIONS: SubdivisionOption[] = [
+  { code: 'AGR_IRR', name: 'Irrigation & Water Access', parentCode: 'AGR' },
+  { code: 'AGR_CROP', name: 'Crops, Seeds & Subsidies', parentCode: 'AGR' },
+  { code: 'WAT_SUP', name: 'Drinking Water Supply', parentCode: 'WAT' },
+  { code: 'WAT_DRAIN', name: 'Drainage & Sewage', parentCode: 'WAT' },
+  { code: 'HLT_FAC', name: 'Health Facilities', parentCode: 'HLT' },
+  { code: 'HLT_MED', name: 'Medicines & Emergency Care', parentCode: 'HLT' },
+  { code: 'EDU_SCH', name: 'Schools & Teachers', parentCode: 'EDU' },
+  { code: 'EDU_AID', name: 'Scholarships & Student Services', parentCode: 'EDU' },
+  { code: 'PWR_SUP', name: 'Electricity Supply', parentCode: 'PWR' },
+  { code: 'PWR_LIGHT', name: 'Street Lighting', parentCode: 'PWR' },
+  { code: 'INF_ROAD', name: 'Roads & Potholes', parentCode: 'INF' },
+  { code: 'INF_BRIDGE', name: 'Bridges & Public Works', parentCode: 'INF' },
+  { code: 'SWM_COLLECTION', name: 'Garbage Collection', parentCode: 'SWM' },
+  { code: 'SWM_DUMP', name: 'Dumping & Cleanliness', parentCode: 'SWM' },
+  { code: 'OTH_SERVICES', name: 'Other Citizen Services', parentCode: 'OTH' },
+];
+
 /* ----------------------------------------------------------------------------
  * Constants
  * -------------------------------------------------------------------------- */
@@ -553,7 +571,8 @@ export default function CitizenIntakeForm({
 
   const [answers, setAnswers] = useState<Answers>({});
   const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>(CATEGORY_OPTIONS);
-  const [subdivisions, setSubdivisions] = useState<SubdivisionOption[]>([]);
+  const [subdivisions, setSubdivisions] =
+    useState<SubdivisionOption[]>(SUBDIVISION_OPTIONS);
   const [draftTitle, setDraftTitle] = useState('');
   const [draftDescription, setDraftDescription] = useState('');
   const [voiceLanguage, setVoiceLanguage] = useState('hi');
@@ -614,7 +633,14 @@ export default function CitizenIntakeForm({
         if (Array.isArray(data.categories) && data.categories.length > 0) {
           setCategoryOptions(data.categories.map((item) => ({ code: item.code, label: item.name })));
         }
-        if (Array.isArray(data.subdivisions)) setSubdivisions(data.subdivisions);
+        if (Array.isArray(data.subdivisions) && data.subdivisions.length > 0) {
+          setSubdivisions(
+            data.subdivisions.map((item) => ({
+              ...item,
+              parentCode: item.parentCode.trim().toUpperCase(),
+            }))
+          );
+        }
       })
       .catch(() => undefined);
     return () => {
@@ -1206,7 +1232,10 @@ export default function CitizenIntakeForm({
         );
       case 'subdivision': {
         const category = answers.category as CategoryOption | null | undefined;
-        const options = subdivisions.filter((item) => item.parentCode === category?.code);
+        const categoryCode = category?.code?.trim().toUpperCase();
+        const options = subdivisions.filter(
+          (item) => item.parentCode.trim().toUpperCase() === categoryCode
+        );
         if (options.length === 0) {
           return (
             <div className="mt-3">
