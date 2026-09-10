@@ -17,6 +17,9 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('confirmed') === '1') {
+      setNotice('Email confirmed. Sign in to continue.');
+    }
     try {
       const supabase = createSupabaseBrowserClient();
       void supabase.auth.getSession().then(({ data }) => {
