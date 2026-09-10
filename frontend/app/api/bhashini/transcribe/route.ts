@@ -10,14 +10,25 @@ const SUPPORTED_LANGUAGES = new Set(['hi', 'en', 'bn', 'ta']);
 interface BhashiniResponse {
   pipelineResponse?: Array<{
     output?: Array<{ source?: unknown }>;
+    audio?: Array<{ source?: unknown }>;
   }>;
+  error?: unknown;
+  message?: unknown;
 }
 
-function audioFormat(contentType: string): string {
-  if (contentType.includes('wav')) return 'wav';
-  if (contentType.includes('ogg')) return 'ogg';
-  if (contentType.includes('mp4')) return 'mp4';
-  return 'webm';
+function getProviderError(payload: BhashiniResponse | null): string {
+  if (!payload) return '';
+  if (typeof payload.error === 'string') return payload.error;
+  if (typeof payload.message === 'string') return payload.message;
+
+  const nested = payload.pipelineResponse?.flatMap((item) => [
+    ...(item.output ?? []),
+    ...(item.audio ?? []),
+  ]);
+  const detail = nested?.find(
+    (item) => typeof item.source === 'string' && item.source.trim()
+  )?.source;
+  return typeof detail === 'string' ? detail : '';
 }
 
 export async function POST(request: NextRequest) {
@@ -30,7 +41,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let body: { audio?: unknown; sourceLanguage?: unknown; contentType?: unknown };
+  let body: { audio?: unknown; sourceLanguage?: unknown };
   try {
     body = (await request.json()) as typeof body;
   } catch {
@@ -40,9 +51,6 @@ export async function POST(request: NextRequest) {
   const audio = typeof body.audio === 'string' ? body.audio : '';
   const sourceLanguage =
     typeof body.sourceLanguage === 'string' ? body.sourceLanguage.trim().toLowerCase() : '';
-  const contentType =
-    typeof body.contentType === 'string' ? body.contentType : 'audio/webm';
-
   if (!audio || !sourceLanguage) {
     return NextResponse.json(
       { error: 'audio and sourceLanguage are required.' },
@@ -83,7 +91,9 @@ export async function POST(request: NextRequest) {
             taskType: 'asr',
             config: {
               language: { sourceLanguage },
-              audioFormat: audioFormat(contentType),
+              // The client always converts browser recordings to PCM WAV before
+              // sending them, regardless of the recorder's original codec.
+              audioFormat: 'wav',
               samplingRate: 16000,
             },
           },
@@ -104,10 +114,7 @@ export async function POST(request: NextRequest) {
 
   const payload = (await response.json().catch(() => null)) as BhashiniResponse | null;
   if (!response.ok) {
-    const providerError =
-      payload && typeof payload === 'object' && 'error' in payload
-        ? String((payload as { error?: unknown }).error ?? '')
-        : '';
+    const providerError = getProviderError(payload);
     console.error(
       '[POST /api/bhashini/transcribe] Bhashini request failed:',
       response.status,
