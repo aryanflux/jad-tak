@@ -108,9 +108,9 @@ ACADEMIC OPPORTUNITIES   INDUSTRY / CSR MARKETPLACE
 ## 8. Team
 | Name | Role |
 |---|---|
+| Avishi Khanna | Citizen Intake & Frontend (PWA — complaint form, geo-tag, voice input) |
 | Vansh Dua | AI Triage & NLP (FastAPI, Bhashini, SBERT) |
 | Ayaan Nath | AI Triage & DBMS Bridge (pgvector, similarity search) |
-| Avishi Khanna | Citizen Intake & Frontend (PWA — complaint form, geo-tag, voice input) |
 | Aryan Kumar Singh | Government & Routing Backend (admin APIs, status workflow, claims/solutions) |
 | Vedang Sahu | Academic & Industry Modules (opportunity board, CSR marketplace UI) |
 | Akshat Kumar Singh | Auth, DevOps & Analytics (login/JWT, deployment, analytics dashboard) |
