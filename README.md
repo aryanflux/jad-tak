@@ -1,15 +1,15 @@
-# Jhar Samadhan — SIH26043
+# जडTak — SIH26043
 
 A crowdsourcing-to-resolution ecosystem for the Government of Jharkhand: citizen intake,
 AI triage, academic claims, industry partnerships, and closed-loop governance.
 
 ## 1. Project Information
-- **Project Title:** Jhar Samadhan
+- **Project Title:** जड़Tak
 - **PS ID:** SIH26043
 - **PS Title:** Digital platform to crowdsource societal challenges and facilitate
   collaborative problem solving through university and industry partnerships
 - **Category:** Software
-- **Theme:** Smart Automation *(confirm exact theme label on the SIH portal)*
+- **Theme:** Smart Education
 
 ## 2. Problem Statement
 Citizens face slow, opaque grievance-redressal systems (e.g. CPGRAMS/PG Portal) where
@@ -18,7 +18,7 @@ NGOs, and industry/CSR programs have capacity to solve real local problems but n
 way to discover them.
 
 ## 3. Proposed Solution
-Jhar Samadhan lets citizens report problems through a low-friction intake form (text, photo,
+जड़Tak lets citizens report problems through a low-friction intake form (text, photo,
 geo-tag, and vernacular voice input). An AI microservice automatically categorizes each report
 and detects duplicates. Government admins review and route validated problems to academic
 institutions, NGOs, and industry partners, who can claim and solve them. Solutions are verified
@@ -45,12 +45,48 @@ existing grievance systems leave open.
 - **Deployment:** Vercel (frontend/API), Supabase (database)
 
 ## 6. Architecture
+Citizen reports flow through AI triage, government review, and academic/industry
+partnerships, with status tracked back to the citizen at every stage.
 See [`docs/architecture.md`](docs/architecture.md) for the full pipeline diagram and
 module-to-folder mapping.
 
+
+CITIZEN
+  |
+  |  (text / photo / geo-tag / vernacular voice)
+  v
+CITIZEN INTAKE (PWA)
+  v
+AI TRIAGE MICROSERVICE (FastAPI)
+  - Bhashini: vernacular -> English
+  - SBERT embeddings + auto-categorization
+  - pgvector similarity: duplicate detection
+  v
+POSTGRESQL (Supabase + pgvector)
+  v
+GOVERNMENT ADMIN DASHBOARD
+  |
+  +---------------------+
+  |                      |
+  v                      v
+ACADEMIC OPPORTUNITIES   INDUSTRY / CSR MARKETPLACE
+  |                      |
+  +----------+-----------+
+             v
+   TEAM CLAIMS & SUBMITS SOLUTION
+             v
+   GOVERNMENT VERIFICATION
+             v
+   STATUS UPDATE + NOTIFICATION
+             v
+   BACK TO CITIZEN (closed loop)
+             v
+   ANALYTICS DASHBOARD
+
+
 ## 7. Repository Structure
 ```
-jhar-samadhaan/
+जड़Tak/
 ├── README.md
 ├── SUBMISSION_GUIDE.md
 ├── submission/
@@ -72,17 +108,17 @@ jhar-samadhaan/
 ## 8. Team
 | Name | Role |
 |---|---|
-| [Add name] | AI Triage & NLP (FastAPI, Bhashini, SBERT) |
-| [Add name] | AI Triage & DBMS Bridge (pgvector, similarity search) |
-| [Add name] | Routing & pipeline (government/academic/industry modules) |
-| [Add name] | [Role] |
-| [Add name] | [Role] |
-| [Add name] | [Role] |
+| Vansh Dua | AI Triage & NLP (FastAPI, Bhashini, SBERT) |
+| Ayaan Nath | AI Triage & DBMS Bridge (pgvector, similarity search) |
+| Avishi Khanna | Citizen Intake & Frontend (PWA — complaint form, geo-tag, voice input) |
+| Aryan Kumar Singh | Government & Routing Backend (admin APIs, status workflow, claims/solutions) |
+| Vedang Sahu | Academic & Industry Modules (opportunity board, CSR marketplace UI) |
+| Akshat Kumar Singh | Auth, DevOps & Analytics (login/JWT, deployment, analytics dashboard) |
 
 ## 9. Installation
 ```bash
-git clone https://github.com/aryanflux/jhar-samadhaan.git
-cd jhar-samadhaan
+git clone https://github.com/aryanflux/jad-tak.git
+cd jad-tak
 
 # Frontend
 cd frontend
