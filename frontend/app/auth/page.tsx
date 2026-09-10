@@ -62,6 +62,25 @@ export default function AuthPage() {
     }
   };
 
+  const resendConfirmation = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { error: resendError } = await supabase.auth.resend({
+        type: 'signup',
+        email: email.trim(),
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (resendError) throw resendError;
+      setNotice('A new confirmation email was requested. Check spam or promotions too.');
+    } catch (resendError) {
+      setError(resendError instanceof Error ? resendError.message : 'Could not resend the confirmation email.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <main className="brand-glow flex min-h-screen items-center justify-center px-4 py-10">
       <section className="surface-card w-full max-w-md p-7 sm:p-8">
@@ -110,6 +129,16 @@ export default function AuthPage() {
           </label>
           {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
           {notice && <p className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{notice}</p>}
+          {notice && mode === 'sign-up' && (
+            <button
+              type="button"
+              onClick={() => void resendConfirmation()}
+              disabled={loading || !email.trim()}
+              className="min-h-[44px] w-full rounded-xl border border-green-200 px-3 py-2 text-sm font-semibold text-green-800 hover:bg-green-50 disabled:opacity-50"
+            >
+              {loading ? 'Requesting email…' : 'Resend confirmation email'}
+            </button>
+          )}
           <button
             disabled={loading}
             className="w-full rounded-full bg-slate-950 px-4 py-3 font-bold text-white transition-all hover:bg-green-700 hover:shadow-lg hover:shadow-green-600/20 disabled:opacity-50"

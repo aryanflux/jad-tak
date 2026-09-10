@@ -1,49 +1,16 @@
 import { NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import { Pool } from 'pg';
+import { createSupabaseServerClient } from '../../../../lib/supabase/server';
+import { getDbPool } from '../../../../lib/db';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
-const globalForDb = globalThis as unknown as { profilePool?: Pool };
-const pool =
-  globalForDb.profilePool ??
-  new Pool({
-    connectionString: process.env.DATABASE_URL,
-    max: 5,
-    idleTimeoutMillis: 30_000,
-  });
-
-if (process.env.NODE_ENV !== 'production') globalForDb.profilePool = pool;
 
 export async function GET() {
   if (!process.env.DATABASE_URL) {
     return NextResponse.json({ error: 'Database is not configured.' }, { status: 503 });
   }
 
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '',
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options),
-            );
-          } catch {
-            // Route handlers can refresh cookies; read-only rendering cannot.
-          }
-        },
-      },
-    },
-  );
-
+  const supabase = await createSupabaseServerClient();
   const {
     data: { user },
     error: authError,
@@ -54,7 +21,7 @@ export async function GET() {
   }
 
   try {
-    const result = await pool.query(
+    const result = await getDbPool().query(
       `SELECT c.id, c.title, c.status, c.created_at
        FROM complaints c
        INNER JOIN users u ON u.id = c.user_id

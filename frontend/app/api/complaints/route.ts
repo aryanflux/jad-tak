@@ -3,7 +3,9 @@ import { Pool } from 'pg';
 import { promises as fs } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import { getDbPool } from '../../../lib/db';
 import { getSbertEmbedUrl } from '../../../lib/sbert';
+import { createSupabaseServerClient } from '../../../lib/supabase/server';
 
 /* ============================================================================
  * POST /api/complaints
@@ -22,10 +24,8 @@ import { getSbertEmbedUrl } from '../../../lib/sbert';
  *   locationAccuracyM string   optional decimal (meters)
  *   photos[]          File     optional WebP files, each < 500 KB, max 4
  *
- * NOTE ON AUTH: `complaints.user_id` is NOT NULL. In production, resolve the
- * citizen from the authenticated session (e.g. NextAuth). Until auth is
- * wired, this handler accepts the numeric user id from the `x-user-id`
- * header or a `userId` form field - replace resolveUserId() before going live.
+ * The complaint owner is resolved from the authenticated Supabase session and
+ * the linked public.users row. Client-supplied identity fields are ignored.
  *
  * Environment:
  *   DATABASE_URL          postgres://user:pass@host:5432/dbname (pgvector enabled)
@@ -100,22 +100,18 @@ interface DuplicateCandidateRow {
  * Helpers
  * -------------------------------------------------------------------------- */
 
-/**
- * Demo-only identity resolution.
- * TODO: replace with the real session (NextAuth / cookie) lookup so the
- * citizen id can never be spoofed by a client-supplied form field.
- */
-async function resolveUserId(request: NextRequest): Promise<number | null> {
-  const headerId = Number(request.headers.get('x-user-id'));
-  if (Number.isInteger(headerId) && headerId > 0) return headerId;
+async function resolveUserId(): Promise<number | null> {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
 
-  const formUserId = await request
-    .clone()
-    .formData()
-    .then((form) => form.get('userId'))
-    .catch(() => null);
-  const parsed = Number(String(formUserId ?? ''));
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+  const result = await getDbPool().query<{ id: number }>(
+    'SELECT id FROM users WHERE auth_user_id = $1 AND is_active = TRUE',
+    [user.id],
+  );
+  return result.rows[0]?.id ?? null;
 }
 
 function toOptionalNumber(raw: FormDataEntryValue | null): number | null {
@@ -242,7 +238,7 @@ export async function POST(request: NextRequest) {
   }
 
   // ---- 2. identify the citizen ---------------------------------------------
-  const userId = await resolveUserId(request);
+  const userId = await resolveUserId();
   if (!userId) {
     return NextResponse.json(
       { error: 'Authentication required: could not resolve the reporting user.' },
