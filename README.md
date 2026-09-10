@@ -1,4 +1,4 @@
-# जडTak — SIH26043
+# जड़Tak — SIH26043
 
 A crowdsourcing-to-resolution ecosystem for the Government of Jharkhand: citizen intake,
 AI triage, academic claims, industry partnerships, and closed-loop governance.
