@@ -57,9 +57,9 @@ export default function AuthPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4 py-10">
-      <section className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-7 shadow-xl">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-700">Jhar Samadhan</p>
+    <main className="brand-glow flex min-h-screen items-center justify-center px-4 py-10">
+      <section className="surface-card w-full max-w-md p-7 sm:p-8">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-700">Civic Resolve</p>
         <h1 className="mt-2 text-3xl font-bold text-slate-900">
           {mode === 'sign-in' ? 'Welcome back' : 'Create your account'}
         </h1>
@@ -77,7 +77,7 @@ export default function AuthPage() {
                 required
                 value={fullName}
                 onChange={(event) => setFullName(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 font-normal outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 font-normal outline-none transition focus:border-green-500 focus:bg-white focus:ring-2 focus:ring-green-100"
               />
             </label>
           )}
@@ -88,7 +88,7 @@ export default function AuthPage() {
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 font-normal outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 font-normal outline-none transition focus:border-green-500 focus:bg-white focus:ring-2 focus:ring-green-100"
             />
           </label>
           <label className="block text-sm font-semibold text-slate-700">
@@ -99,14 +99,14 @@ export default function AuthPage() {
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2.5 font-normal outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 font-normal outline-none transition focus:border-green-500 focus:bg-white focus:ring-2 focus:ring-green-100"
             />
           </label>
           {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
           {notice && <p className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{notice}</p>}
           <button
             disabled={loading}
-            className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="w-full rounded-full bg-slate-950 px-4 py-3 font-bold text-white transition-all hover:bg-green-700 hover:shadow-lg hover:shadow-green-600/20 disabled:opacity-50"
           >
             {loading ? 'Please wait…' : mode === 'sign-in' ? 'Sign in' : 'Create account'}
           </button>
@@ -119,7 +119,7 @@ export default function AuthPage() {
             setError(null);
             setNotice(null);
           }}
-          className="mt-5 w-full text-sm font-semibold text-indigo-700"
+          className="mt-5 w-full text-sm font-semibold text-green-700"
         >
           {mode === 'sign-in' ? 'Need an account? Create one' : 'Already registered? Sign in'}
         </button>

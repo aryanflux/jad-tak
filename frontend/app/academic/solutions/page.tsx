@@ -692,7 +692,7 @@ function SolutionsPortal() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <main className="mx-auto w-full max-w-4xl px-4 py-8">
+      <main className="brand-shell mx-auto w-full max-w-4xl px-4 py-8">
         {/* ---------- header ---------- */}
         <header className="text-center">
           <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">

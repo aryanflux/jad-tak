@@ -2,13 +2,121 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --brand-50: #f0fdf4;
+  --brand-100: #dcfce7;
+  --brand-500: #22c55e;
+  --brand-600: #16a34a;
+  --brand-700: #15803d;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --surface: #ffffff;
+  --canvas: #f8fafc;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
 }
 
 body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: var(--brand-100);
+  color: var(--brand-700);
+}
+
+.surface-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.07);
+}
+
+.brand-glow {
+  background:
+    radial-gradient(circle at 10% 20%, rgba(34, 197, 94, 0.2), transparent 35%),
+    radial-gradient(circle at 90% 10%, rgba(74, 222, 128, 0.16), transparent 30%),
+    linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.brand-shell {
+  min-height: 100vh;
+}
+
+/* Shared visual language for legacy module screens. */
+.bg-indigo-50,
+.bg-blue-50,
+.bg-emerald-50 {
+  background-color: var(--brand-50) !important;
+}
+
+.bg-indigo-100,
+.bg-blue-100,
+.bg-emerald-100 {
+  background-color: var(--brand-100) !important;
+}
+
+.bg-indigo-500,
+.bg-blue-500,
+.bg-emerald-500,
+.bg-emerald-600,
+.bg-indigo-600,
+.bg-blue-600 {
+  background-color: var(--brand-600) !important;
+}
+
+.bg-indigo-700,
+.bg-blue-700,
+.bg-emerald-700 {
+  background-color: var(--brand-700) !important;
+}
+
+.text-indigo-600,
+.text-indigo-700,
+.text-blue-600,
+.text-blue-700,
+.text-emerald-600,
+.text-emerald-700,
+.text-emerald-800 {
+  color: var(--brand-700) !important;
+}
+
+.border-indigo-200,
+.border-indigo-300,
+.border-blue-200,
+.border-blue-300,
+.border-emerald-200,
+.border-emerald-300 {
+  border-color: #bbf7d0 !important;
+}
+
+[class~='shadow-sm'] {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+}
+
+button,
+a {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in-out;
+}
+
+button:not(:disabled):hover,
+a:hover {
+  transform: translateY(-1px);
 }
 
 /* line-clamp used across dashboard cards (Tailwind core plugin, but keep a

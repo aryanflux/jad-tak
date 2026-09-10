@@ -65,45 +65,60 @@ export default function HomePage() {
       'jhar-samadhan-session',
       JSON.stringify({ email: normalizedEmail, role })
     );
-
-    window.setTimeout(() => {
-      router.push(ROUTES[role]);
-    }, 350);
+    window.setTimeout(() => router.push(ROUTES[role]), 350);
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-100 px-4 py-8 sm:py-12">
+    <main className="min-h-screen brand-glow px-4 py-6 sm:py-10">
       <div className="mx-auto grid w-full max-w-6xl items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="px-1 sm:px-6">
-          <p className="text-xs font-bold uppercase tracking-[0.25em] text-indigo-700">
-            SIH26 · Government of Jharkhand
+        <section className="px-1 sm:px-8">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-600 text-lg font-black text-white shadow-lg shadow-green-600/20">
+              CR
+            </span>
+            <span className="text-sm font-bold tracking-tight text-slate-900">Civic Resolve</span>
+          </div>
+          <p className="mt-16 text-xs font-bold uppercase tracking-[0.25em] text-green-700">
+            Community operations platform
           </p>
-          <h1 className="mt-4 text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">
-            Jhar-Samadhaan
+          <h1 className="mt-4 max-w-2xl text-5xl font-black leading-[0.98] tracking-[-0.05em] text-slate-950 sm:text-7xl">
+            See what matters.
+            <span className="block text-green-600">Act with confidence.</span>
           </h1>
-          <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600">
-            One civic ecosystem for reporting problems, discovering solutions, and turning
-            community ideas into measurable action.
+          <p className="mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
+            Bring community reports, trusted partners, and resolution teams into one clear,
+            collaborative workspace.
           </p>
           <div className="mt-8 grid max-w-xl gap-3 text-sm text-slate-700 sm:grid-cols-3">
-            <div className="rounded-2xl border border-blue-100 bg-white/80 p-4 shadow-sm">
-              Report issues
-            </div>
-            <div className="rounded-2xl border border-blue-100 bg-white/80 p-4 shadow-sm">
-              Collaborate
-            </div>
-            <div className="rounded-2xl border border-blue-100 bg-white/80 p-4 shadow-sm">
-              Track impact
-            </div>
+            {[
+              ['Report', 'Capture what matters'],
+              ['Connect', 'Find the right team'],
+              ['Resolve', 'Track real progress'],
+            ].map(([title, description]) => (
+              <div key={title} className="surface-card p-4 transition-all duration-200 hover:-translate-y-1">
+                <p className="font-bold text-slate-950">{title}</p>
+                <p className="mt-1 text-xs text-slate-500">{description}</p>
+              </div>
+            ))}
           </div>
         </section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
-          <h2 className="text-2xl font-bold text-slate-950">
-            {mode === 'sign-in' ? 'Welcome back' : 'Join Jhar-Samadhaan'}
-          </h2>
-          <p className="mt-2 text-sm text-slate-500">
-            Select your role to open the right workspace.
+        <section className="surface-card p-6 sm:p-8">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-green-700">
+                Workspace access
+              </p>
+              <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
+                {mode === 'sign-in' ? 'Welcome back' : 'Create your account'}
+              </h2>
+            </div>
+            <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700 ring-1 ring-green-100">
+              Secure
+            </span>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-slate-500">
+            Choose your role to open a workspace tailored to your responsibilities.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -113,19 +128,14 @@ export default function HomePage() {
                 required
                 value={role}
                 onChange={(event) => setRole(event.target.value as Role)}
-                className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 font-normal outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 font-normal outline-none transition focus:border-green-500 focus:bg-white focus:ring-2 focus:ring-green-100"
               >
-                <option value="" disabled>
-                  Choose your role
-                </option>
+                <option value="" disabled>Choose your role</option>
                 {ROLE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
+                  <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
             </label>
-
             <label className="block text-sm font-semibold text-slate-700">
               Email
               <input
@@ -134,10 +144,9 @@ export default function HomePage() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="you@example.com"
-                className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 font-normal outline-none transition focus:border-green-500 focus:bg-white focus:ring-2 focus:ring-green-100"
               />
             </label>
-
             <label className="block text-sm font-semibold text-slate-700">
               Password
               <input
@@ -147,29 +156,22 @@ export default function HomePage() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 placeholder="At least 6 characters"
-                className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-3 font-normal outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 font-normal outline-none transition focus:border-green-500 focus:bg-white focus:ring-2 focus:ring-green-100"
               />
             </label>
-
-            {error && (
-              <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">
-                {error}
-              </p>
-            )}
-
+            {error && <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
             <button
               type="submit"
               disabled={loading || !role}
-              className="w-full rounded-xl bg-indigo-600 px-4 py-3 font-bold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-full bg-slate-950 px-4 py-3 font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-green-700 hover:shadow-lg hover:shadow-green-600/20 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loading ? 'Opening your workspace…' : mode === 'sign-in' ? 'Sign in' : 'Create account'}
             </button>
           </form>
-
           <button
             type="button"
             onClick={() => setMode(mode === 'sign-in' ? 'sign-up' : 'sign-in')}
-            className="mt-5 w-full text-sm font-semibold text-indigo-700 hover:text-indigo-900"
+            className="mt-5 w-full text-sm font-semibold text-green-700 hover:text-green-800"
           >
             {mode === 'sign-in' ? 'New here? Create an account' : 'Already registered? Sign in'}
           </button>
