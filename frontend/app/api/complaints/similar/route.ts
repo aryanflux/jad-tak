@@ -14,7 +14,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Request body must be valid JSON.' }, { status: 400 });
   }
   const text = typeof body.text === 'string' ? body.text.trim().slice(0, 4000) : '';
-  if (text.length < 10) return NextResponse.json({ complaints: [] });
+  const categoryCode =
+    typeof body.categoryCode === 'string' ? body.categoryCode.trim().toUpperCase() : null;
+  if (text.length < 10 && !categoryCode) return NextResponse.json({ complaints: [] });
 
   try {
     const suppliedEmbedding = Array.isArray(body.embedding) ? body.embedding : null;
@@ -26,8 +28,6 @@ export async function POST(request: NextRequest) {
         : null;
     if (embeddingValues) {
       const pool = getDbPool();
-      const categoryCode =
-        typeof body.categoryCode === 'string' ? body.categoryCode.trim().toUpperCase() : null;
       const embedding = `[${embeddingValues.join(',')}]`;
       const result = await pool.query(
         `SELECT c.id, c.title, c.description, c.status, cat.name AS category_name,
@@ -49,6 +49,29 @@ export async function POST(request: NextRequest) {
           status: row.status,
           category: row.category_name,
           similarity: Math.round(Number(row.similarity) * 1000) / 1000,
+        })),
+      });
+    }
+    if (text.length < 10 && categoryCode) {
+      const pool = getDbPool();
+      const result = await pool.query(
+        `SELECT c.id, c.title, c.description, c.status, cat.name AS category_name
+           FROM complaints c
+           JOIN categories cat ON cat.id = c.category_id
+           LEFT JOIN categories parent ON parent.id = cat.parent_id
+          WHERE cat.code = $1 OR parent.code = $1
+          ORDER BY c.created_at DESC
+          LIMIT 5`,
+        [categoryCode]
+      );
+      return NextResponse.json({
+        complaints: result.rows.map((row) => ({
+          id: row.id,
+          title: row.title,
+          description: row.description,
+          status: row.status,
+          category: row.category_name,
+          similarity: 0,
         })),
       });
     }
@@ -74,8 +97,6 @@ export async function POST(request: NextRequest) {
     }
 
     const pool = getDbPool();
-    const categoryCode =
-      typeof body.categoryCode === 'string' ? body.categoryCode.trim().toUpperCase() : null;
     const embedding = `[${embeddingPayload.embedding.join(',')}]`;
     const result = await pool.query<{
       id: number;
