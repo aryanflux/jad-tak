@@ -50,7 +50,7 @@ partnerships, with status tracked back to the citizen at every stage.
 See [`docs/architecture.md`](docs/architecture.md) for the full pipeline diagram and
 module-to-folder mapping.
 
-'''
+```
 CITIZEN
   |
   |  (text / photo / geo-tag / vernacular voice)
@@ -82,7 +82,7 @@ ACADEMIC OPPORTUNITIES   INDUSTRY / CSR MARKETPLACE
    BACK TO CITIZEN (closed loop)
              v
    ANALYTICS DASHBOARD
-'''
+```
 
 ## 7. Repository Structure
 ```
