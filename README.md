@@ -115,7 +115,19 @@ ACADEMIC OPPORTUNITIES   INDUSTRY / CSR MARKETPLACE
 | Vedang Sahu | Academic & Industry Modules (opportunity board, CSR marketplace UI) |
 | Akshat Kumar Singh | Auth, DevOps & Analytics (login/JWT, deployment, analytics dashboard) |
 
-## 9. Installation
+## 9. Final Presentation
+The presentation provides an overview of project.
+See [`submission/PRESENTATION.md`](submission/PRESENTATION.md) for the presentation.
+
+## 10. Demo Video
+The demo video walks through the functionality of each module working as a complete portal.
+See [`submission/DEMO.md`](submission/DEMO.md) for the full walkthrough video.
+
+## 11. Prototype Screenshots
+The Screenshots provide an insight of each module working in the portal.
+See [`assets/screenshots/`](assets/screenshots/) for key screens.
+
+## 12. Installation
 ```bash
 git clone https://github.com/aryanflux/jad-tak.git
 cd jad-tak
@@ -133,7 +145,7 @@ Copy `.env.example` to `.env.local` (frontend) and fill in real values for
 `DATABASE_URL`, `JWT_SECRET`, `NEXT_PUBLIC_MAPPLS_API_KEY`, Bhashini keys, etc.
 Never commit the filled-in `.env.local`.
 
-## 10. Run
+## 13. Run
 ```bash
 # Frontend (from frontend/)
 npm run dev
@@ -142,14 +154,10 @@ npm run dev
 uvicorn main:app --reload
 ```
 
-## 11. Live Deployment
+## 14. Live Deployment
 [https://jhar-samadhaan.vercel.app](https://jhar-samadhaan.vercel.app)
 
-## 12. Final Output
-See [`assets/screenshots/`](assets/screenshots/) for key screens, and
-[`submission/DEMO.md`](submission/DEMO.md) for the full walkthrough video.
-
-## 13. Future Scope
+## 15. Future Scope
 - Full Bhashini integration across all Indian languages supported by the platform
 - SMS-based notifications for citizens without reliable internet access
 - Offline-first PWA mode for low-connectivity areas
