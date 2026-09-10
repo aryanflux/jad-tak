@@ -595,6 +595,7 @@ export default function CitizenIntakeForm({
   >([]);
   const [loadingSubmittedSimilar, setLoadingSubmittedSimilar] = useState(false);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
+  const [relatedProblemsOpen, setRelatedProblemsOpen] = useState(false);
   const [distinctComplaint, setDistinctComplaint] = useState(false);
   const [pickedPhotos, setPickedPhotos] = useState<WebpPhoto[]>([]);
   const [processingPhotos, setProcessingPhotos] = useState(false);
@@ -1140,6 +1141,7 @@ export default function CitizenIntakeForm({
     setUpvoteNote(null);
     setSubmittedSimilarComplaints([]);
     setLoadingSubmittedSimilar(false);
+    setRelatedProblemsOpen(false);
     setSubmitted(false);
   };
 
@@ -1759,7 +1761,22 @@ export default function CitizenIntakeForm({
           </div>
 
           {answers.category && !submitted && (
-            <aside className="fixed bottom-24 right-4 z-30 max-h-[min(70vh,34rem)] w-[min(22rem,calc(100vw-2rem))] overflow-y-auto rounded-[2rem] border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-900/15 before:absolute before:-bottom-2 before:right-8 before:h-5 before:w-5 before:rotate-45 before:border-b before:border-r before:border-slate-200 before:bg-white lg:bottom-6 lg:right-8 xl:left-[calc(50%+20rem)] xl:right-auto">
+            <>
+              <button
+                type="button"
+                onClick={() => setRelatedProblemsOpen((open) => !open)}
+                aria-expanded={relatedProblemsOpen}
+                className="fixed bottom-24 right-4 z-30 rounded-full border border-green-200 bg-white px-4 py-2.5 text-xs font-bold text-green-800 shadow-lg shadow-slate-900/10 transition hover:bg-green-50 lg:bottom-6 lg:right-8 xl:left-[calc(50%+20rem)] xl:right-auto"
+              >
+                {relatedProblemsOpen ? 'Hide related problems' : 'Related problems'}
+                {similarComplaints.length > 0 && (
+                  <span className="ml-2 rounded-full bg-green-100 px-1.5 py-0.5 text-[10px] text-green-700">
+                    {similarComplaints.length}
+                  </span>
+                )}
+              </button>
+              {relatedProblemsOpen && (
+            <aside className="fixed bottom-36 right-4 z-30 max-h-[min(70vh,34rem)] w-[min(22rem,calc(100vw-2rem))] overflow-y-auto rounded-[2rem] border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-900/15 before:absolute before:-bottom-2 before:right-8 before:h-5 before:w-5 before:rotate-45 before:border-b before:border-r before:border-slate-200 before:bg-white lg:bottom-20 lg:right-8 xl:left-[calc(50%+20rem)] xl:right-auto">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-sm font-bold text-slate-900">Related problems</h2>
@@ -1814,6 +1831,8 @@ export default function CitizenIntakeForm({
                 </div>
               )}
             </aside>
+              )}
+            </>
           )}
         </div>
       </main>
