@@ -76,7 +76,7 @@ export default function HomePage() {
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-600 text-lg font-black text-white shadow-lg shadow-green-600/20">
               JT
             </span>
-            <span className="text-sm font-bold tracking-tight text-slate-900">JadTak</span>
+            <span className="text-sm font-bold tracking-tight text-slate-900">जड़Tak</span>
           </div>
           <p className="mt-16 text-xs font-bold uppercase tracking-[0.25em] text-green-700">
             Community operations platform

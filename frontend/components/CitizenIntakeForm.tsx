@@ -1500,7 +1500,7 @@ export default function CitizenIntakeForm({
             </p>
           </div>
           <span className="rounded-md bg-green-50 px-2.5 py-1 text-[10px] font-semibold text-green-700 ring-1 ring-green-100">
-            JadTak
+            जड़Tak
           </span>
         </div>
         {/* progress dots */}
