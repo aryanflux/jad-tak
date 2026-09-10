@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Civic Resolve',
+  title: 'JadTak',
   description:
     'A modern platform for community reports, collaboration, and measurable resolution.',
 };

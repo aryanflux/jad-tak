@@ -38,7 +38,7 @@ export default function HomePage() {
 
     const normalizedEmail = email.trim().toLowerCase();
     const registeredRoles = JSON.parse(
-      window.localStorage.getItem('jhar-samadhan-registered-roles') ?? '{}'
+      window.localStorage.getItem('jadtak-registered-roles') ?? '{}'
     ) as Record<string, Role>;
     const registeredRole = registeredRoles[normalizedEmail];
 
@@ -57,12 +57,12 @@ export default function HomePage() {
     }
 
     registeredRoles[normalizedEmail] = role;
-    window.localStorage.setItem('jhar-samadhan-registered-roles', JSON.stringify(registeredRoles));
+    window.localStorage.setItem('jadtak-registered-roles', JSON.stringify(registeredRoles));
     setError(null);
     setLoading(true);
-    window.localStorage.setItem('jhar-samadhan-role', role);
+    window.localStorage.setItem('jadtak-role', role);
     window.localStorage.setItem(
-      'jhar-samadhan-session',
+      'jadtak-session',
       JSON.stringify({ email: normalizedEmail, role })
     );
     window.setTimeout(() => router.push(ROUTES[role]), 350);
@@ -74,9 +74,9 @@ export default function HomePage() {
         <section className="px-1 sm:px-8">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-600 text-lg font-black text-white shadow-lg shadow-green-600/20">
-              CR
+              JT
             </span>
-            <span className="text-sm font-bold tracking-tight text-slate-900">Civic Resolve</span>
+            <span className="text-sm font-bold tracking-tight text-slate-900">JadTak</span>
           </div>
           <p className="mt-16 text-xs font-bold uppercase tracking-[0.25em] text-green-700">
             Community operations platform

@@ -1,8 +1,8 @@
 {
-  "name": "jhar-samadhan-frontend",
+  "name": "jadtak-frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "Jhar Samadhan — SIH 26043 crowdsourcing-to-resolution PWA frontend (Next.js App Router + Tailwind CSS)",
+  "description": "JadTak — a community reporting and resolution PWA (Next.js App Router + Tailwind CSS)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

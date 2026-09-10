@@ -1,5 +1,5 @@
 -- ============================================================================
--- SIH 26043 — Jhar Samadhan | Comprehensive database seed
+-- JadTak | Comprehensive database seed
 -- ----------------------------------------------------------------------------
 -- Populates users, categories, complaints (384-dim embeddings + geo + every
 -- workflow stage + duplicate clusters), claims, solutions, partnerships,

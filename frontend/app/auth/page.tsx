@@ -59,7 +59,7 @@ export default function AuthPage() {
   return (
     <main className="brand-glow flex min-h-screen items-center justify-center px-4 py-10">
       <section className="surface-card w-full max-w-md p-7 sm:p-8">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-700">Civic Resolve</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-700">JadTak</p>
         <h1 className="mt-2 text-3xl font-bold text-slate-900">
           {mode === 'sign-in' ? 'Welcome back' : 'Create your account'}
         </h1>
