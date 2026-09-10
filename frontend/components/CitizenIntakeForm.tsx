@@ -42,6 +42,15 @@ interface SubdivisionOption {
   parentCode: string;
 }
 
+interface SimilarComplaint {
+  id: number;
+  title: string;
+  description: string;
+  status: string;
+  category: string;
+  similarity: number;
+}
+
 export interface WebpPhoto {
   /** Ready-to-upload WebP file, guaranteed < 500 KB. */
   file: File;
@@ -580,9 +589,11 @@ export default function CitizenIntakeForm({
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
-  const [similarComplaints, setSimilarComplaints] = useState<
-    Array<{ id: number; title: string; description: string; status: string; category: string; similarity: number }>
+  const [similarComplaints, setSimilarComplaints] = useState<SimilarComplaint[]>([]);
+  const [submittedSimilarComplaints, setSubmittedSimilarComplaints] = useState<
+    SimilarComplaint[]
   >([]);
+  const [loadingSubmittedSimilar, setLoadingSubmittedSimilar] = useState(false);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
   const [distinctComplaint, setDistinctComplaint] = useState(false);
   const [pickedPhotos, setPickedPhotos] = useState<WebpPhoto[]>([]);
@@ -594,6 +605,7 @@ export default function CitizenIntakeForm({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [upvoteNote, setUpvoteNote] = useState<string | null>(null);
   const [voting, setVoting] = useState(false);
+  const [upvotingComplaintId, setUpvotingComplaintId] = useState<number | null>(null);
 
   /* ---- refs ------------------------------------------------------------ */
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -1022,7 +1034,36 @@ export default function CitizenIntakeForm({
       // Wait for the citizen's decision before showing the success screen.
       setDuplicate(outcome.cluster);
     } else {
+      void loadSubmittedSimilarComplaints(payload);
       setSubmitted(true);
+    }
+  };
+
+  const loadSubmittedSimilarComplaints = async (payload: IntakePayload) => {
+    setLoadingSubmittedSimilar(true);
+    try {
+      const embedding = await createComplaintEmbedding(`${payload.title}. ${payload.description}`);
+      const response = await fetch('/api/complaints/similar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: `${payload.title}. ${payload.description}`,
+          embedding,
+          categoryCode: payload.categoryCode,
+        }),
+      });
+      const data = (await response.json().catch(() => null)) as {
+        complaints?: SimilarComplaint[];
+      } | null;
+      setSubmittedSimilarComplaints(
+        Array.isArray(data?.complaints)
+          ? data.complaints.filter((complaint) => complaint.similarity >= 0.65)
+          : []
+      );
+    } catch {
+      setSubmittedSimilarComplaints([]);
+    } finally {
+      setLoadingSubmittedSimilar(false);
     }
   };
 
@@ -1072,6 +1113,19 @@ export default function CitizenIntakeForm({
     }
   };
 
+  const handleUpvoteComplaint = async (complaintId: number) => {
+    if (upvotingComplaintId !== null || !isOnline) return;
+    setUpvotingComplaintId(complaintId);
+    try {
+      await fetch(`${apiEndpoint}/${complaintId}/upvote`, {
+        method: 'POST',
+        headers: userId === undefined ? {} : { 'x-user-id': String(userId) },
+      });
+    } finally {
+      setUpvotingComplaintId(null);
+    }
+  };
+
   const resetForm = () => {
     objectUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
     objectUrlsRef.current = [];
@@ -1081,6 +1135,8 @@ export default function CitizenIntakeForm({
     setSubmitError(null);
     setDuplicate(null);
     setUpvoteNote(null);
+    setSubmittedSimilarComplaints([]);
+    setLoadingSubmittedSimilar(false);
     setSubmitted(false);
   };
 
@@ -1640,6 +1696,51 @@ export default function CitizenIntakeForm({
               <p className="mt-1 text-sm text-teal-800">
                 You'll get an email alert at every step of the resolution.
               </p>
+              {(loadingSubmittedSimilar || submittedSimilarComplaints.length > 0) && (
+                <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm">
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Similar reports in your community
+                  </h3>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Read related reports and support one that describes the same issue.
+                  </p>
+                  {loadingSubmittedSimilar ? (
+                    <p className="mt-3 text-xs text-slate-400">Finding related reports…</p>
+                  ) : (
+                    <div className="mt-3 space-y-2">
+                      {submittedSimilarComplaints.map((complaint) => (
+                        <details
+                          key={complaint.id}
+                          className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+                        >
+                          <summary className="cursor-pointer text-sm font-semibold text-slate-800">
+                            {complaint.title}
+                            <span className="ml-2 text-xs font-normal text-slate-400">
+                              {Math.round(complaint.similarity * 100)}% similar
+                            </span>
+                          </summary>
+                          <p className="mt-2 text-xs leading-5 text-slate-600">
+                            {complaint.description}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => void handleUpvoteComplaint(complaint.id)}
+                            disabled={
+                              upvotingComplaintId !== null ||
+                              !isOnline
+                            }
+                            className="mt-3 rounded-full bg-green-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {upvotingComplaintId === complaint.id
+                              ? 'Saving…'
+                              : '👍 Support this report'}
+                          </button>
+                        </details>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               <button
                 type="button"
                 onClick={resetForm}
