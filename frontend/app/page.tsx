@@ -1,7 +1,8 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { createSupabaseBrowserClient } from '../lib/supabase/browser';
 
 type Role = 'citizen' | 'govt_admin' | 'institution' | 'student' | 'ngo' | 'csr';
 
@@ -31,41 +32,64 @@ export default function HomePage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!role) return;
-
-    const normalizedEmail = email.trim().toLowerCase();
-    const registeredRoles = JSON.parse(
-      window.localStorage.getItem('jadtak-registered-roles') ?? '{}'
-    ) as Record<string, Role>;
-    const registeredRole = registeredRoles[normalizedEmail];
-
-    if (mode === 'sign-up' && registeredRole) {
+  useEffect(() => {
+    try {
+      const supabase = createSupabaseBrowserClient();
+      void supabase.auth.getSession().then(({ data }) => {
+        const savedRole = data.session?.user.user_metadata?.role as Role | undefined;
+        if (savedRole && savedRole in ROUTES) router.replace(ROUTES[savedRole]);
+      });
+    } catch (configurationError) {
       setError(
-        registeredRole === role
-          ? 'This email is already registered. Switch to Sign in.'
-          : `This email is already registered as ${registeredRole}. One email can only use one role.`
+        configurationError instanceof Error
+          ? configurationError.message
+          : 'Authentication is not configured.'
       );
-      return;
     }
+  }, [router]);
 
-    if (mode === 'sign-in' && registeredRole && registeredRole !== role) {
-      setError(`This email is registered as ${registeredRole}. Select that role to continue.`);
-      return;
-    }
-
-    registeredRoles[normalizedEmail] = role;
-    window.localStorage.setItem('jadtak-registered-roles', JSON.stringify(registeredRoles));
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!role || !email.trim() || !password) return;
     setError(null);
+    setNotice(null);
     setLoading(true);
-    window.localStorage.setItem('jadtak-role', role);
-    window.localStorage.setItem(
-      'jadtak-session',
-      JSON.stringify({ email: normalizedEmail, role })
-    );
-    window.setTimeout(() => router.push(ROUTES[role]), 350);
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const normalizedEmail = email.trim().toLowerCase();
+      const result =
+        mode === 'sign-in'
+          ? await supabase.auth.signInWithPassword({ email: normalizedEmail, password })
+          : await supabase.auth.signUp({
+              email: normalizedEmail,
+              password,
+              options: { data: { role } },
+            });
+      if (result.error) throw result.error;
+      if (mode === 'sign-up' && !result.data.session) {
+        setNotice('Account created. Confirm your email, then sign in.');
+        return;
+      }
+      const savedRole = result.data.user?.user_metadata?.role as Role | undefined;
+      if (mode === 'sign-in' && savedRole && savedRole !== role) {
+        await supabase.auth.signOut();
+        throw new Error(`This account is registered for the ${savedRole} workspace.`);
+      }
+      const authenticatedRole =
+        savedRole ?? role;
+      router.replace(ROUTES[authenticatedRole in ROUTES ? authenticatedRole : role]);
+      router.refresh();
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : 'Authentication failed. Check your email and password.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -118,7 +142,7 @@ export default function HomePage() {
             </span>
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-500">
-            Choose your role to open a workspace tailored to your responsibilities.
+            Create one account per email and use it to return to your workspace anytime.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -160,6 +184,7 @@ export default function HomePage() {
               />
             </label>
             {error && <p role="alert" className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+            {notice && <p className="rounded-xl bg-green-50 px-3 py-2 text-sm text-green-700">{notice}</p>}
             <button
               type="submit"
               disabled={loading || !role}
@@ -176,7 +201,7 @@ export default function HomePage() {
             {mode === 'sign-in' ? 'New here? Create an account' : 'Already registered? Sign in'}
           </button>
           <p className="mt-4 text-center text-xs text-slate-400">
-            Prototype gateway · your selected role is saved for this browser session
+            Your account is secured by Supabase and your session can persist across visits.
           </p>
         </section>
       </div>
