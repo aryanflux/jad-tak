@@ -6,6 +6,11 @@ export const dynamic = 'force-dynamic';
 const MAX_AUDIO_BYTES = 10 * 1024 * 1024;
 const DEFAULT_ENDPOINT = 'https://dhruva-api.bhashini.gov.in/services/inference/pipeline';
 const SUPPORTED_LANGUAGES = new Set(['hi', 'en', 'bn', 'ta']);
+const PLACEHOLDER_VALUES = new Set([
+  '',
+  'your_bhashini_api_key_here',
+  'your_bhashini_user_id_here',
+]);
 
 interface BhashiniResponse {
   pipelineResponse?: Array<{
@@ -31,10 +36,14 @@ function getProviderError(payload: BhashiniResponse | null): string {
   return typeof detail === 'string' ? detail : '';
 }
 
+function configuredValue(value: string | undefined): string {
+  return value?.trim() ?? '';
+}
+
 export async function POST(request: NextRequest) {
-  const apiKey = process.env.BHASHINI_API_KEY;
-  const userId = process.env.BHASHINI_USER_ID;
-  if (!apiKey || !userId) {
+  const apiKey = configuredValue(process.env.BHASHINI_API_KEY);
+  const userId = configuredValue(process.env.BHASHINI_USER_ID);
+  if (PLACEHOLDER_VALUES.has(apiKey) || PLACEHOLDER_VALUES.has(userId)) {
     return NextResponse.json(
       { error: 'Bhashini is not configured. Set BHASHINI_API_KEY and BHASHINI_USER_ID.' },
       { status: 503 }
@@ -120,6 +129,15 @@ export async function POST(request: NextRequest) {
       response.status,
       providerError
     );
+    if (response.status === 401 || response.status === 403) {
+      return NextResponse.json(
+        {
+          error:
+            `Bhashini rejected the credentials (HTTP ${response.status}). Set the current BHASHINI_API_KEY and BHASHINI_USER_ID in the deployment environment, then redeploy.`,
+        },
+        { status: 503 }
+      );
+    }
     return NextResponse.json(
       {
         error: providerError
