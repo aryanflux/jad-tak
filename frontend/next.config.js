@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
   reactStrictMode: true,
   // Dev-only: allow the preview/embedded browser to reach dev resources (HMR,
   // fonts) when the app is opened via 127.0.0.1 — without this, Next 16 blocks
