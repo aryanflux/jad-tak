@@ -498,16 +498,12 @@ function VerificationQueue() {
         {/* ---------- header ---------- */}
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
-              Module 7 · Prototype Verification & Loop Closure
-            </p>
             <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
-              Solution Verification Command Center
+              Solution Review
             </h1>
             <p className="mt-1 max-w-2xl text-sm text-slate-500">
-              Review student and NGO prototypes, test their links, and close the
-              loop — every decision is audited, and both the team lead and the
-              original citizen are alerted.
+              Review submitted solutions, verify supporting details, and keep
+              contributors informed of each decision.
             </p>
           </div>
           <button
@@ -528,7 +524,7 @@ function VerificationQueue() {
               Demo authentication required
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              Open the command center with a govt_admin user id:
+              Open solution review with a government administrator id:
             </p>
             <code className="mt-3 inline-block rounded-lg bg-slate-100 px-3 py-1.5 font-mono text-xs text-emerald-700">
               /admin/solutions?admin=1

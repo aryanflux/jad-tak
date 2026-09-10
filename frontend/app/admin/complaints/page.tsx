@@ -657,9 +657,6 @@ function ComplaintQueue() {
         {/* ---------- header ---------- */}
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
-              Government of Jharkhand · SIH 26043
-            </p>
             <h1 className="mt-1 text-2xl font-bold text-slate-900">
               Complaint Resolution Queue
             </h1>

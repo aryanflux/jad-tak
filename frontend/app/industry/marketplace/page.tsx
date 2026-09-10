@@ -789,16 +789,12 @@ function IndustryMarketplace() {
       <main className="brand-shell mx-auto w-full max-w-6xl px-4 py-8">
         {/* ---------- header ---------- */}
         <header className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-700">
-            Module 5 · Industry &amp; CSR Partnership
-          </p>
           <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
-            Innovation Funding Marketplace
+            Partnership Marketplace
           </h1>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-500">
-            Browse govt-validated student &amp; NGO prototypes from Jharkhand and pledge
-            financial grants, technical mentorship, or pilot deployment infrastructure —
-            every commitment is routed to the team and the state admin command center.
+            Discover promising community solutions and offer funding, mentorship,
+            or pilot support.
           </p>
         </header>
 

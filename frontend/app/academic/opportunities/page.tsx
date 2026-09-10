@@ -311,7 +311,7 @@ function ClaimModal({ opportunity, onClose, onSubmitted }: ClaimModalProps) {
               <div>
                 <div className="mb-1 flex items-baseline justify-between">
                   <label htmlFor="claim-proposal" className="block text-xs font-semibold text-slate-600">
-                    Project Proposal (NEP 2020) <span className="text-rose-500">*</span>
+                    Project Proposal <span className="text-rose-500">*</span>
                   </label>
                   <span
                     className={`text-[11px] ${
@@ -483,7 +483,7 @@ export default function AcademicOpportunitiesPage() {
           >
             {justAdopted === opportunity.id
               ? '✓ Claimed — under review'
-              : 'Adopt this Problem →'}
+              : '              Explore opportunity →'}
           </button>
         </div>
       </div>
@@ -495,16 +495,12 @@ export default function AcademicOpportunitiesPage() {
       <main className="brand-shell mx-auto w-full max-w-6xl px-4 py-8">
         {/* ---------- header ---------- */}
         <header className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
-            Module 4 · NEP 2020 Problem-Based Learning
-          </p>
           <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
-            Academic Opportunities Board
+            Community Opportunities
           </h1>
           <p className="mx-auto mt-2 max-w-xl text-sm text-slate-500">
-            Faculty and student teams can adopt validated civic problems from
-            Jharkhand and submit formal proposals for government-backed
-            prototyping.
+            Explore validated community needs and submit proposals for practical
+            solutions.
           </p>
         </header>
 

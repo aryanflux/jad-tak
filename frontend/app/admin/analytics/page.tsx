@@ -357,16 +357,12 @@ function AnalyticsCommandCenter() {
       <main className="brand-shell mx-auto w-full max-w-7xl px-4 py-8">
         {/* ---------- header ---------- */}
         <header className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-700">
-            Module 8 · Governance Analytics &amp; Impact
-          </p>
           <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
-            Jharkhand SIH Analytics Command Center
+            Impact Analytics
           </h1>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-500">
-            Macro-level social outcomes and innovation metrics across districts
-            and thematic domains — crowd-to-resolution, academic adoption,
-            industry funding and loop closure.
+            Monitor community outcomes, service performance, and partnership
+            activity across districts and thematic areas.
           </p>
         </header>
 
@@ -378,7 +374,7 @@ function AnalyticsCommandCenter() {
               Demo authentication required
             </h2>
             <p className="mt-1 text-sm text-slate-500">
-              Open the command center as a government administrator:
+              Open analytics as a government administrator:
             </p>
             <code className="mt-3 inline-block rounded-lg bg-slate-100 px-3 py-1.5 font-mono text-xs text-indigo-700">
               /admin/analytics?admin=1
@@ -717,7 +713,7 @@ function AnalyticsCommandCenter() {
                 metrics.funding.byType.pilot.count === 0 ? (
                   <EmptyNote>
                     No partnership pledges in this scope yet — the industry marketplace
-                    (Module 5) feeds this panel.
+                    partnership marketplace feeds this panel.
                   </EmptyNote>
                 ) : (
                   <div className="grid gap-3 sm:grid-cols-3">
@@ -792,7 +788,7 @@ function AnalyticsCommandCenter() {
                 {metrics.institutions.length === 0 ? (
                   <EmptyNote>
                     No institutional adoptions in scope yet — the opportunities board
-                    (Module 4) feeds this list.
+                    opportunities board feeds this list.
                   </EmptyNote>
                 ) : (
                   <ol className="space-y-2.5">

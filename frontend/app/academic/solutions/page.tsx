@@ -249,8 +249,7 @@ function SubmitModal({ claim, userId, onClose, onSubmitted }: SubmitModalProps) 
               <span className="font-semibold text-slate-800">#{success.iteration}</span>{' '}
               of “{claim.complaintTitle}” is now{' '}
               <span className="font-semibold text-sky-700">submitted</span> and has been
-              routed to the government admin command center for prototype
-              verification and loop closure.
+              routed for review and verification.
             </p>
             <button
               type="button"
@@ -695,16 +694,12 @@ function SolutionsPortal() {
       <main className="brand-shell mx-auto w-full max-w-4xl px-4 py-8">
         {/* ---------- header ---------- */}
         <header className="text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
-            Module 6 · Prototype Verification & Loop Closure
-          </p>
           <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
-            Solution Submission Portal
+            Solution Workspace
           </h1>
           <p className="mx-auto mt-2 max-w-xl text-sm text-slate-500">
-            Teams with approved claims submit versioned prototype documentation —
-            each iteration is sent to the government admin command center for
-            verification.
+            Submit solution updates, supporting documentation, and progress for
+            review.
           </p>
         </header>
 
