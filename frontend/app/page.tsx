@@ -82,8 +82,8 @@ export default function HomePage() {
             Community operations platform
           </p>
           <h1 className="mt-4 max-w-2xl text-5xl font-black leading-[0.98] tracking-[-0.05em] text-slate-950 sm:text-7xl">
-            See what matters.
-            <span className="block text-green-600">Act with confidence.</span>
+            Bridging Citizens, Academia, and Industry
+            <span className="block text-green-600">to Solve Civic Challenges.</span>
           </h1>
           <p className="mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
             Bring community reports, trusted partners, and resolution teams into one clear,
