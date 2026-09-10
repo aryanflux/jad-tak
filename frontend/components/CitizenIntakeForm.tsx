@@ -1759,7 +1759,7 @@ export default function CitizenIntakeForm({
           </div>
 
           {answers.category && !submitted && (
-            <aside className="fixed bottom-24 right-4 z-30 max-h-[min(70vh,34rem)] w-[min(22rem,calc(100vw-2rem))] overflow-y-auto rounded-[2rem] border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-900/15 before:absolute before:-bottom-2 before:right-8 before:h-5 before:w-5 before:rotate-45 before:border-b before:border-r before:border-slate-200 before:bg-white lg:bottom-6">
+            <aside className="fixed bottom-24 right-4 z-30 max-h-[min(70vh,34rem)] w-[min(22rem,calc(100vw-2rem))] overflow-y-auto rounded-[2rem] border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-900/15 before:absolute before:-bottom-2 before:right-8 before:h-5 before:w-5 before:rotate-45 before:border-b before:border-r before:border-slate-200 before:bg-white lg:bottom-6 lg:right-8 xl:left-[calc(50%+20rem)] xl:right-auto">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-sm font-bold text-slate-900">Related problems</h2>
