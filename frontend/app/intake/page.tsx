@@ -3,16 +3,16 @@ import CitizenIntakeForm from '../../components/CitizenIntakeForm';
 
 export default function ComplaintIntakePage() {
   return (
-    <main className="brand-shell mx-auto w-full max-w-3xl px-4 py-10">
+    <main className="brand-shell brand-glow mx-auto w-full max-w-3xl px-4 py-10">
       <Link
         href="/"
-        className="text-sm font-semibold text-indigo-700 hover:text-indigo-900"
+        className="text-sm font-semibold text-green-700 hover:text-green-900"
       >
         ← Back to workspace
       </Link>
 
       <header className="mt-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-indigo-700">
+        <p className="text-xs font-semibold uppercase tracking-widest text-green-700">
           Community intake
         </p>
         <h1 className="mt-1 text-3xl font-bold text-slate-900">

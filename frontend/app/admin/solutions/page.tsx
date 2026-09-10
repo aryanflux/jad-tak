@@ -493,7 +493,7 @@ function VerificationQueue() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen brand-glow">
       <main className="brand-shell mx-auto w-full max-w-5xl px-4 py-8">
         {/* ---------- header ---------- */}
         <header className="flex flex-wrap items-end justify-between gap-3">
