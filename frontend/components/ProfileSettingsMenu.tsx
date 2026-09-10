@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { createSupabaseBrowserClient } from '../lib/supabase/browser';
 
 export default function ProfileSettingsMenu() {
   const router = useRouter();
+  const pathname = usePathname();
   const menuRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -21,6 +22,10 @@ export default function ProfileSettingsMenu() {
     document.addEventListener('mousedown', closeOnOutsideClick);
     return () => document.removeEventListener('mousedown', closeOnOutsideClick);
   }, []);
+
+  if (pathname === '/' || pathname === '/auth') {
+    return null;
+  }
 
   const signOut = async (switchAccount = false) => {
     setBusy(true);

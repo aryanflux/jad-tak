@@ -86,7 +86,7 @@ export default function AuthPage() {
       <section className="surface-card w-full max-w-md p-7 sm:p-8">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-700">जड़Tak</p>
         <h1 className="mt-2 text-3xl font-bold text-slate-900">
-          {mode === 'sign-in' ? 'Welcome back' : 'Create your account'}
+          {mode === 'sign-in' ? 'Welcome back' : 'Get started'}
         </h1>
         <p className="mt-2 text-sm text-slate-500">
           {mode === 'sign-in'
@@ -128,6 +128,16 @@ export default function AuthPage() {
             />
           </label>
           {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+          {error && error.toLowerCase().includes('email not confirmed') && (
+            <button
+              type="button"
+              onClick={() => void resendConfirmation()}
+              disabled={loading || !email.trim()}
+              className="min-h-[44px] w-full rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
+            >
+              {loading ? 'Requesting email…' : 'Resend confirmation email'}
+            </button>
+          )}
           {notice && <p className="rounded-xl bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{notice}</p>}
           {notice && mode === 'sign-up' && (
             <button
@@ -143,7 +153,7 @@ export default function AuthPage() {
             disabled={loading}
             className="w-full rounded-full bg-slate-950 px-4 py-3 font-bold text-white transition-all hover:bg-green-700 hover:shadow-lg hover:shadow-green-600/20 disabled:opacity-50"
           >
-            {loading ? 'Please wait…' : mode === 'sign-in' ? 'Sign in' : 'Create account'}
+            {loading ? 'Please wait…' : mode === 'sign-in' ? 'Sign in' : 'Register'}
           </button>
         </form>
 
@@ -156,7 +166,7 @@ export default function AuthPage() {
           }}
           className="mt-5 w-full text-sm font-semibold text-green-700"
         >
-          {mode === 'sign-in' ? 'Need an account? Create one' : 'Already registered? Sign in'}
+          {mode === 'sign-in' ? 'New here? Register now' : 'Already registered? Sign in'}
         </button>
       </section>
     </main>

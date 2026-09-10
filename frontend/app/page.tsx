@@ -72,13 +72,13 @@ export default function HomePage() {
             });
       if (result.error) throw result.error;
       if (mode === 'sign-up' && !result.data.session) {
-        setNotice('Account created. Confirm your email, then sign in.');
+        setNotice('Registration successful. Confirm your email, then sign in.');
         return;
       }
       const savedRole = result.data.user?.user_metadata?.role as Role | undefined;
       if (mode === 'sign-in' && savedRole && savedRole !== role) {
         await supabase.auth.signOut();
-        throw new Error(`This account is registered for the ${savedRole} workspace.`);
+        throw new Error(`This profile is registered for the ${savedRole} workspace.`);
       }
       const authenticatedRole =
         savedRole ?? role;
@@ -160,7 +160,7 @@ export default function HomePage() {
                 Workspace access
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
-                {mode === 'sign-in' ? 'Welcome back' : 'Create your account'}
+                {mode === 'sign-in' ? 'Welcome back' : 'Get started'}
               </h2>
             </div>
             <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700 ring-1 ring-green-100">
@@ -168,7 +168,9 @@ export default function HomePage() {
             </span>
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-500">
-            Create one account per email and use it to return to your workspace anytime.
+            {mode === 'sign-in'
+              ? 'Enter your credentials to return to your workspace anytime.'
+              : 'Register with your email to access your stakeholder workspace.'}
           </p>
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -226,7 +228,7 @@ export default function HomePage() {
               disabled={loading || !role}
               className="w-full rounded-full bg-slate-950 px-4 py-3 font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-green-700 hover:shadow-lg hover:shadow-green-600/20 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? 'Opening your workspace…' : mode === 'sign-in' ? 'Sign in' : 'Create account'}
+              {loading ? 'Opening your workspace…' : mode === 'sign-in' ? 'Sign in' : 'Register'}
             </button>
           </form>
           <button
@@ -234,10 +236,10 @@ export default function HomePage() {
             onClick={() => setMode(mode === 'sign-in' ? 'sign-up' : 'sign-in')}
             className="mt-5 w-full text-sm font-semibold text-green-700 hover:text-green-800"
           >
-            {mode === 'sign-in' ? 'New here? Create an account' : 'Already registered? Sign in'}
+            {mode === 'sign-in' ? 'New here? Register now' : 'Already registered? Sign in'}
           </button>
           <p className="mt-4 text-center text-xs text-slate-400">
-            Your account is secured by Supabase and your session can persist across visits.
+            Protected by Supabase authentication. Your session persists across visits.
           </p>
         </section>
       </div>
