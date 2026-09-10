@@ -289,7 +289,7 @@ function ComplaintQueue() {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [duplicatesOnly, setDuplicatesOnly] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>('cards');
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
 
   /* ---- data ------------------------------------------------------------- */
   const [complaints, setComplaints] = useState<AdminComplaint[]>([]);
