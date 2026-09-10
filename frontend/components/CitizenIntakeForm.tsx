@@ -10,6 +10,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from 'react';
+import { createComplaintEmbedding } from '../lib/embeddings';
 
 /* ============================================================================
  * CitizenIntakeForm.tsx
@@ -613,10 +614,11 @@ export default function CitizenIntakeForm({
       setLoadingSimilar(true);
       try {
         const category = answers.category as CategoryOption | null | undefined;
+        const embedding = await createComplaintEmbedding(text);
         const response = await fetch('/api/complaints/similar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text, categoryCode: category?.code ?? null }),
+          body: JSON.stringify({ text, embedding, categoryCode: category?.code ?? null }),
         });
         const data = (await response.json().catch(() => null)) as {
           complaints?: typeof similarComplaints;
@@ -870,6 +872,12 @@ export default function CitizenIntakeForm({
     if (payload.subdivisionCode) formData.append('subdivisionCode', payload.subdivisionCode);
     formData.append('privacy', payload.isAnonymous ? 'anonymous' : 'public');
     formData.append('distinctComplaint', distinctComplaint ? 'true' : 'false');
+    try {
+      const embedding = await createComplaintEmbedding(`${payload.title}. ${payload.description}`);
+      formData.append('embedding', JSON.stringify(embedding));
+    } catch (error) {
+      console.warn('Browser embedding unavailable; the server will use its configured fallback.', error);
+    }
     formData.append('submissionMode', payload.submissionMode);
     if (payload.sourceLanguage) formData.append('sourceLanguage', payload.sourceLanguage);
     if (payload.latitude !== null && payload.longitude !== null) {
