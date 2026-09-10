@@ -43,7 +43,10 @@ export default function AuthPage() {
           : await supabase.auth.signUp({
               email: email.trim(),
               password,
-              options: { data: { full_name: fullName.trim() } },
+              options: {
+                data: { full_name: fullName.trim() },
+                emailRedirectTo: `${window.location.origin}/auth/callback`,
+              },
             });
       if (result.error) throw result.error;
       if (mode === 'sign-up' && !result.data.session) {

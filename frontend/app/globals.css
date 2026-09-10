@@ -33,6 +33,17 @@ textarea {
   font: inherit;
 }
 
+button,
+[role='button'],
+a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  min-height: 44px;
+}
+
 ::selection {
   background: var(--brand-100);
   color: var(--brand-700);

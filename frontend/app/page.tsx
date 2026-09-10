@@ -65,7 +65,10 @@ export default function HomePage() {
           : await supabase.auth.signUp({
               email: normalizedEmail,
               password,
-              options: { data: { role } },
+              options: {
+                data: { role },
+                emailRedirectTo: `${window.location.origin}/auth/callback`,
+              },
             });
       if (result.error) throw result.error;
       if (mode === 'sign-up' && !result.data.session) {

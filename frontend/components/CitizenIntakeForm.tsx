@@ -1340,13 +1340,25 @@ export default function CitizenIntakeForm({
       case 'photos':
         return (
           <div className="mt-3">
-            <div className="flex items-center gap-3">
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-md active:scale-[0.98]">
-                📷 {pickedPhotos.length > 0 ? 'Add more photos' : 'Attach a photo'}
+            <div className="grid gap-2 sm:grid-cols-2">
+              <label className="inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-md active:scale-[0.98]">
+                <span aria-hidden="true">📷</span>
+                <span>Take Photo</span>
                 <input
                   type="file"
                   accept="image/*"
                   capture="environment"
+                  className="sr-only"
+                  onChange={handlePickPhotos}
+                  disabled={processingPhotos || pickedPhotos.length >= maxPhotos}
+                />
+              </label>
+              <label className="inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-2xl border-2 border-dashed border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-md active:scale-[0.98]">
+                <span aria-hidden="true">🖼️</span>
+                <span>{pickedPhotos.length > 0 ? 'Add from Gallery' : 'Upload from Gallery'}</span>
+                <input
+                  type="file"
+                  accept="image/*"
                   multiple
                   className="sr-only"
                   onChange={handlePickPhotos}
@@ -1354,7 +1366,7 @@ export default function CitizenIntakeForm({
                 />
               </label>
               {processingPhotos && (
-                <span className="text-sm text-slate-500">
+                <span className="text-sm text-slate-500 sm:col-span-2">
                   Compressing to WebP…
                 </span>
               )}
