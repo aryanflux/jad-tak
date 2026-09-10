@@ -82,10 +82,14 @@ export default function HomePage() {
       router.replace(ROUTES[authenticatedRole in ROUTES ? authenticatedRole : role]);
       router.refresh();
     } catch (submitError) {
+      const message =
+        submitError instanceof TypeError && submitError.message === 'Failed to fetch'
+          ? 'Cannot reach Supabase. Verify NEXT_PUBLIC_SUPABASE_URL is the exact Project URL from Supabase, then redeploy.'
+          : submitError instanceof Error
+            ? submitError.message
+            : 'Authentication failed. Check your email and password.';
       setError(
-        submitError instanceof Error
-          ? submitError.message
-          : 'Authentication failed. Check your email and password.'
+        message
       );
     } finally {
       setLoading(false);
