@@ -1,0 +1,6 @@
+{
+  "name": "जड़Tak",
+  "description": "A community reporting and resolution platform bridging citizens, academia, and industry.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

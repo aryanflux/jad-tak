@@ -58,17 +58,7 @@ const DEDUPE_WINDOW_DAYS = Number(process.env.DEDUPE_WINDOW_DAYS ?? 90) || 90;
  * Singleton pg pool (survives hot reload in dev)
  * -------------------------------------------------------------------------- */
 
-const globalForDb = globalThis as unknown as { pgPool?: Pool };
-
-const pool =
-  globalForDb.pgPool ??
-  new Pool({
-    connectionString: process.env.DATABASE_URL,
-    max: 10,
-    idleTimeoutMillis: 30_000,
-  });
-
-if (process.env.NODE_ENV !== 'production') globalForDb.pgPool = pool;
+const pool = getDbPool();
 
 /* ----------------------------------------------------------------------------
  * Small types
@@ -212,13 +202,6 @@ async function removePersistedPhotos(complaintId: number): Promise<void> {
  * -------------------------------------------------------------------------- */
 
 export async function POST(request: NextRequest) {
-  if (!process.env.DATABASE_URL) {
-    return NextResponse.json(
-      { error: 'DATABASE_URL is not configured. Add it to the environment before submitting.' },
-      { status: 500 }
-    );
-  }
-
   // ---- 1. parse + validate the multipart body -------------------------------
   if (!request.headers.get('content-type')?.includes('multipart/form-data')) {
     return NextResponse.json(

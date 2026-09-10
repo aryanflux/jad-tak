@@ -6,7 +6,12 @@ import ProfileSettingsMenu from '../components/ProfileSettingsMenu';
 export const metadata: Metadata = {
   title: 'जड़Tak',
   description:
-    'A modern platform for community reports, collaboration, and measurable resolution.',
+    'A community reporting and resolution platform bridging citizens, academia, and industry.',
+  openGraph: {
+    title: 'जड़Tak',
+    description:
+      'A community reporting and resolution platform bridging citizens, academia, and industry.',
+  },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

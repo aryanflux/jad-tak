@@ -6,10 +6,6 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  if (!process.env.DATABASE_URL) {
-    return NextResponse.json({ error: 'Database is not configured.' }, { status: 503 });
-  }
-
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
