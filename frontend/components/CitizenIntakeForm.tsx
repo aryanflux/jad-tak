@@ -1251,23 +1251,18 @@ export default function CitizenIntakeForm({
         }
         return (
           <div className="mt-3">
-            <select
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
-              defaultValue=""
-              onChange={(event) => {
-                const option = options.find((item) => item.code === event.target.value);
-                if (option) chooseSubdivision(option);
-              }}
-            >
-              <option value="" disabled>
-                Select a subdivision
-              </option>
+            <div className="grid grid-cols-2 gap-2">
               {options.map((option) => (
-                <option key={option.code} value={option.code}>
+                <button
+                  key={option.code}
+                  type="button"
+                  onClick={() => chooseSubdivision(option)}
+                  className="rounded-2xl border border-slate-200 bg-white px-3 py-3 text-left text-sm font-medium text-slate-800 shadow-sm transition-all duration-200 ease-in-out hover:-translate-y-0.5 hover:border-green-300 hover:bg-green-50 hover:shadow-md active:scale-[0.98]"
+                >
                   {option.name}
-                </option>
+                </button>
               ))}
-            </select>
+            </div>
             <button
               type="button"
               onClick={skipSubdivision}
