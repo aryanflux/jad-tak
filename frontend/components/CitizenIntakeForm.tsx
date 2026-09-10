@@ -1533,7 +1533,7 @@ export default function CitizenIntakeForm({
 
       {/* ---- chat transcript ---- */}
       <main className="flex-1 overflow-y-auto px-4 py-5">
-        <div className="mx-auto grid w-full max-w-6xl gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="mx-auto w-full max-w-3xl">
           <div className="flex min-w-0 flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
           {bubble(
             'assistant',
@@ -1759,7 +1759,7 @@ export default function CitizenIntakeForm({
           </div>
 
           {answers.category && !submitted && (
-            <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-4">
+            <aside className="fixed bottom-24 right-4 z-30 max-h-[min(70vh,34rem)] w-[min(22rem,calc(100vw-2rem))] overflow-y-auto rounded-[2rem] border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-900/15 before:absolute before:-bottom-2 before:right-8 before:h-5 before:w-5 before:rotate-45 before:border-b before:border-r before:border-slate-200 before:bg-white lg:bottom-6">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-sm font-bold text-slate-900">Related problems</h2>
