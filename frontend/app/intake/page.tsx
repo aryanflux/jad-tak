@@ -3,7 +3,7 @@ import CitizenIntakeForm from '../../components/CitizenIntakeForm';
 
 export default function ComplaintIntakePage() {
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10">
+    <main className="brand-shell mx-auto w-full max-w-3xl px-4 py-10">
       <Link
         href="/"
         className="text-sm font-semibold text-indigo-700 hover:text-indigo-900"
