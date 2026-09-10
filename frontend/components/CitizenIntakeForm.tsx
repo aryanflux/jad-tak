@@ -182,6 +182,24 @@ const REVIEW_LABELS: Record<StepKey, string> = {
   privacy: 'Privacy',
 };
 
+function MicIcon({ active = false }: { active?: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      className={`h-5 w-5 ${active ? 'text-rose-600' : 'text-green-700'}`}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7" />
+    </svg>
+  );
+}
+
 /* ----------------------------------------------------------------------------
  * Canvas / WebP compression utilities
  * -------------------------------------------------------------------------- */
@@ -1178,9 +1196,11 @@ export default function CitizenIntakeForm({
               type="button"
               onClick={startVoiceIntake}
               disabled={recording || transcribing}
-              className="mt-3 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 transition-all hover:bg-indigo-100 disabled:opacity-50"
+              aria-label="Start voice input"
+              title="Start voice input"
+              className="mt-3 inline-flex h-10 w-10 items-center justify-center rounded-full border border-green-200 bg-green-50 transition-all hover:bg-green-100 disabled:opacity-50"
             >
-              {transcribing ? 'Transcribing…' : '🎙️ Speak with Bhashini instead'}
+              <MicIcon />
             </button>
           </div>
         );
@@ -1378,22 +1398,25 @@ export default function CitizenIntakeForm({
 
   /* ------------------------------------------------------------------------ */
   return (
-    <div className="flex h-[100dvh] flex-col bg-gradient-to-b from-slate-50 to-slate-100">
+    <div className="flex h-[100dvh] flex-col bg-[#f8fafc]">
       {/* ---- header ---- */}
-      <header className="border-b border-slate-200 bg-white/85 px-4 pb-2 pt-3 shadow-sm backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-xl items-center justify-between gap-3">
+      <header className="border-b border-slate-200 bg-white px-4 pb-3 pt-3 shadow-sm">
+        <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="truncate text-base font-bold text-slate-900">
-              Community Intake
+            <p className="text-[10px] font-semibold text-slate-400">← Back</p>
+            <h1 className="mt-1 truncate text-base font-bold tracking-tight text-slate-950">
+              New Community Report
             </h1>
             <p className="text-xs text-slate-500">
-              Step {Math.min(stepProgress + 1, STEP_ORDER.length)} of{' '}
-              {STEP_ORDER.length} · {geoPill}
+              Step {Math.min(stepProgress + 1, STEP_ORDER.length)} of {STEP_ORDER.length}
             </p>
           </div>
+          <span className="rounded-md bg-green-50 px-2.5 py-1 text-[10px] font-semibold text-green-700 ring-1 ring-green-100">
+            Civic Portal
+          </span>
         </div>
         {/* progress dots */}
-        <div className="mx-auto mt-2 flex w-full max-w-xl gap-1.5">
+        <div className="mx-auto mt-3 flex w-full max-w-3xl gap-1.5">
           {STEP_ORDER.map((key) => {
             const done = answers[key] !== undefined;
             const active = key === currentKey;
@@ -1411,6 +1434,7 @@ export default function CitizenIntakeForm({
             );
           })}
         </div>
+        <div className="mx-auto mt-2 flex w-full max-w-3xl justify-end">{geoPill}</div>
       </header>
 
       {/* ---- offline banner (PWA) ---- */}
@@ -1422,8 +1446,8 @@ export default function CitizenIntakeForm({
       )}
 
       {/* ---- chat transcript ---- */}
-      <main className="flex-1 overflow-y-auto px-4 py-4">
-        <div className="mx-auto flex w-full max-w-xl flex-col gap-3">
+      <main className="flex-1 overflow-y-auto px-4 py-5">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-5">
           {bubble(
             'assistant',
             <p>
@@ -1645,7 +1669,7 @@ export default function CitizenIntakeForm({
                   <select
                     value={voiceLanguage}
                     onChange={(event) => setVoiceLanguage(event.target.value)}
-                    className="rounded-xl border border-slate-300 bg-white px-2 py-2 text-xs"
+                    className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-2 text-xs"
                     aria-label="Voice language"
                   >
                     <option value="hi">Hindi</option>
@@ -1657,9 +1681,11 @@ export default function CitizenIntakeForm({
                     type="button"
                     onClick={startVoiceIntake}
                     disabled={recording || transcribing}
-                    className="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 disabled:opacity-50"
+                    aria-label="Start voice input"
+                    title="Start voice input"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-green-200 bg-green-50 transition hover:bg-green-100 disabled:opacity-50"
                   >
-                    {transcribing ? 'Transcribing…' : 'Speak with Bhashini'}
+                    <MicIcon />
                   </button>
                 </div>
                 <p className="mt-1 text-xs text-slate-400">
@@ -1675,13 +1701,13 @@ export default function CitizenIntakeForm({
                     rows={3}
                     placeholder="Describe the issue…"
                     autoFocus
-                    className="max-h-40 flex-1 resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200"
+                    className="max-h-40 flex-1 resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-green-500 focus:bg-white focus:ring-2 focus:ring-green-100"
                   />
                   <button
                     type="button"
                     onClick={commitDescription}
                     disabled={!descriptionValid}
-                    className="rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-full bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Send
                   </button>
@@ -1690,7 +1716,7 @@ export default function CitizenIntakeForm({
                   <select
                     value={voiceLanguage}
                     onChange={(event) => setVoiceLanguage(event.target.value)}
-                    className="rounded-xl border border-slate-300 bg-white px-2 py-2 text-xs"
+                    className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-2 text-xs"
                     aria-label="Voice language"
                   >
                     <option value="hi">Hindi</option>
@@ -1702,9 +1728,15 @@ export default function CitizenIntakeForm({
                     type="button"
                     onClick={toggleRecording}
                     disabled={transcribing}
-                    className="rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 disabled:opacity-50"
+                    aria-label={recording ? 'Stop voice input' : 'Start voice input'}
+                    title={recording ? 'Stop voice input' : 'Start voice input'}
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full border transition disabled:opacity-50 ${
+                      recording
+                        ? 'border-rose-200 bg-rose-50'
+                        : 'border-green-200 bg-green-50 hover:bg-green-100'
+                    }`}
                   >
-                    {recording ? 'Stop recording' : transcribing ? 'Transcribing…' : 'Speak with Bhashini'}
+                    <MicIcon active={recording} />
                   </button>
                 </div>
                 {loadingSimilar && (
