@@ -81,7 +81,7 @@ export default function HomePage() {
           <p className="mt-16 text-xs font-bold uppercase tracking-[0.25em] text-green-700">
             Community operations platform
           </p>
-          <h1 className="mt-4 max-w-2xl text-5xl font-black leading-[0.98] tracking-[-0.05em] text-slate-950 sm:text-7xl">
+          <h1 className="mt-4 max-w-2xl text-4xl font-black leading-[0.98] tracking-[-0.05em] text-slate-950 sm:text-6xl">
             Bridging Citizens, Academia, and Industry
             <span className="block text-green-600">to Solve Civic Challenges.</span>
           </h1>
