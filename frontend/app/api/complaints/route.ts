@@ -344,7 +344,18 @@ export async function POST(request: NextRequest) {
   // Semantic deduplication needs the 384-dim vector before we can search for
   // near-duplicates. If the microservice is down, embedding/cluster stay NULL
   // and the complaint is still stored.
-  const embedding = await requestEmbedding(`${title}. ${description}`);
+  const suppliedEmbedding = formData.get('embedding');
+  let parsedEmbedding: unknown = null;
+  if (typeof suppliedEmbedding === 'string') {
+    try {
+      parsedEmbedding = JSON.parse(suppliedEmbedding);
+    } catch {
+      parsedEmbedding = null;
+    }
+  }
+  const embedding = isEmbeddingVector(parsedEmbedding)
+    ? parsedEmbedding
+    : await requestEmbedding(`${title}. ${description}`);
 
   // ---- 9. transaction: category lookup + dedupe + INSERT + audit log ---------
   const client = await pool.connect();

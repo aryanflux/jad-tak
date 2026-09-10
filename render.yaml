@@ -3,5 +3,5 @@ services:
     name: civic-resolve-sbert
     runtime: docker
     rootDir: ml
-    plan: starter
+    plan: free
     healthCheckPath: /health
