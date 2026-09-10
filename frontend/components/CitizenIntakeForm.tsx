@@ -717,7 +717,11 @@ export default function CitizenIntakeForm({
     setVoiceError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      const preferredMimeTypes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'];
+      const mimeType = preferredMimeTypes.find((type) =>
+        MediaRecorder.isTypeSupported(type)
+      );
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       audioChunksRef.current = [];
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) audioChunksRef.current.push(event.data);
@@ -736,7 +740,6 @@ export default function CitizenIntakeForm({
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               audio,
-              contentType: blob.type,
               sourceLanguage: voiceLanguage,
             }),
           });
